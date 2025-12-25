@@ -1,8 +1,3 @@
-/* ================================
-   NEON KNIGHTS - CYBERPUNK MECH GAME
-   Tron/Cyberpunk/Medieval-Futuristic
-   ================================ */
-
    :root {
     /* Neon Color Palette */
     --neon-cyan: #00fff9;
@@ -405,12 +400,13 @@ body {
 .hangar-content {
     position: relative;
     z-index: 1;
-    height: 100%;
+    height: 100vh; /* Force full height */
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 40px;
+    justify-content: center; /* Centers content vertically */
+    padding: 20px; /* Reduced padding to save space */
+    overflow: hidden; /* Prevents scrollbars */
 }
 
 .hangar-title {
@@ -419,18 +415,29 @@ body {
     letter-spacing: 0.3em;
     color: var(--neon-magenta);
     text-shadow: 0 0 20px var(--neon-magenta);
-    margin-bottom: 60px;
+    margin-bottom: 10px; /* Reduced from 60px to pull everything up */
+    margin-top: 20px;
 }
 
 .mech-selection {
     display: flex;
     gap: 40px;
-    margin-bottom: 60px;
+    margin-bottom: 20px; /* Reduced margin */
+    margin-top: 10px;
     overflow-x: auto;
+    overflow-y: hidden; /* Prevent vertical scroll */
     padding: 20px;
-    max-width: 1200px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--neon-cyan) rgba(0, 0, 0, 0.3);
+    width: 100%;        /* Full width */
+    max-width: 100%;    /* Prevent resizing issues */
+    
+    /* Hide scrollbar but keep functionality */
+    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;  /* IE/Edge */
+}
+
+/* Hide Webkit scrollbar (Chrome/Safari) */
+.mech-selection::-webkit-scrollbar {
+    display: none; 
 }
 
 .mech-selection::-webkit-scrollbar {
@@ -478,16 +485,26 @@ body {
 }
 
 .mech-card {
+    /* Dynamic height based on screen size */
+    height: 55vh; 
+    min-height: 350px;
+    max-height: 500px;
+    
+    /* Fixed width */
     width: 280px;
     min-width: 280px;
+    
     background: var(--bg-panel);
     border: 2px solid rgba(255, 255, 255, 0.1);
-    padding: 25px;
+    padding: 15px; /* Slightly reduced padding */
     cursor: pointer;
     transition: all 0.3s ease;
     clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+    
+    /* Flex layout to organize content vertically */
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
 }
 
 .mech-card:hover,
@@ -504,11 +521,13 @@ body {
 
 .mech-preview {
     width: 100%;
-    height: 180px;
-    margin-bottom: 15px;
+    /* This makes the image stretch to fill available space, but shrink if needed */
+    flex: 1; 
+    min-height: 0; /* Critical for flex items to shrink properly */
+    margin-bottom: 10px;
     position: relative;
     overflow: hidden;
-    flex-shrink: 0;
+    border-radius: 4px;
 }
 
 .mech-info {
@@ -1881,3 +1900,809 @@ body {
     margin: 1rem 0;
 }
 
+/* ================================
+   IMPROVED MAIN MENU GOLD
+   ================================ */
+.menu-gold-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 10px 25px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,215,0,0.4);
+    border-radius: 4px;
+}
+
+.menu-gold-display .gold-icon {
+    color: #ffd700;
+    font-size: 1.2rem;
+}
+
+.menu-gold-display #menu-gold {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+
+.menu-gold-display .gold-label {
+    font-size: 0.8rem;
+    color: rgba(255,215,0,0.7);
+    letter-spacing: 2px;
+}
+
+/* ================================
+   IMPROVED STORY MAP
+   ================================ */
+.story-map-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(ellipse at 30% 70%, rgba(0,100,150,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 30%, rgba(150,0,100,0.15) 0%, transparent 50%),
+        linear-gradient(180deg, #050510 0%, #0a0a1a 100%);
+}
+
+.world-map {
+    width: 100%;
+    height: 60%;
+    position: relative;
+    margin-bottom: 0;
+    z-index: 5;
+    background: 
+        radial-gradient(ellipse at 30% 40%, rgba(100, 150, 100, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(150, 100, 50, 0.1) 0%, transparent 50%),
+        linear-gradient(180deg, #1a2a1a 0%, #2a3a2a 50%, #1a1a2a 100%);
+    border: 2px solid rgba(201, 162, 39, 0.3);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Country Map Background */
+.map-background {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.map-terrain {
+    width: 100%;
+    height: 100%;
+    opacity: 0.6;
+}
+
+.terrain-mountains {
+    fill: #4a5a4a;
+    opacity: 0.4;
+}
+
+.terrain-forest {
+    fill: #2d4a2d;
+    opacity: 0.5;
+}
+
+.terrain-plains {
+    fill: #567d46;
+    opacity: 0.3;
+}
+
+/* Path Lines */
+.map-path {
+    stroke: #666;
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 5 3;
+    opacity: 0.4;
+    transition: all 0.5s ease;
+}
+
+.map-path.unlocked {
+    stroke: #c9a227;
+    stroke-width: 3;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 5px rgba(201, 162, 39, 0.5));
+    stroke-dasharray: none;
+    animation: pathGlow 2s ease-in-out infinite;
+}
+
+@keyframes pathGlow {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Level Nodes - Country Map Style */
+.level-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+.node-icon-box {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,30,0.9) 100%);
+    border: 3px solid #333;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.node-icon-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.level-node:hover .node-icon-box::before {
+    opacity: 1;
+}
+
+.node-icon-box span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    color: #666;
+    z-index: 1;
+    position: relative;
+    text-shadow: 0 0 10px rgba(0,0,0,0.8);
+}
+
+.node-name {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.node-status {
+    font-size: 0.6rem;
+    color: #00ff66;
+    letter-spacing: 2px;
+}
+
+.node-lock-icon {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    color: #ff6600;
+    font-size: 0.8rem;
+}
+
+/* Unlocked Nodes */
+.level-node.unlocked .node-icon-box {
+    border-color: #c9a227;
+    box-shadow: 0 0 20px rgba(201, 162, 39, 0.4), inset 0 0 20px rgba(201, 162, 39, 0.1);
+    background: linear-gradient(135deg, rgba(201, 162, 39, 0.2) 0%, rgba(0,0,0,0.9) 100%);
+}
+
+.level-node.unlocked .node-icon-box span {
+    color: #c9a227;
+    text-shadow: 0 0 15px rgba(201, 162, 39, 0.8);
+}
+
+.level-node.unlocked .node-name {
+    color: #c9a227;
+    text-shadow: 0 0 10px rgba(201, 162, 39, 0.5);
+}
+
+.level-node.unlocked:hover {
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+.level-node.unlocked:hover .node-icon-box {
+    box-shadow: 0 0 30px rgba(201, 162, 39, 0.7), inset 0 0 30px rgba(201, 162, 39, 0.2);
+    border-color: #ffd700;
+}
+
+/* Home Node */
+.level-node.home .node-icon-box {
+    border-color: #ffd700;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5), inset 0 0 25px rgba(255, 215, 0, 0.1);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(0,0,0,0.9) 100%);
+    animation: homePulse 2s ease-in-out infinite;
+}
+
+@keyframes homePulse {
+    0%, 100% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.5), inset 0 0 25px rgba(255, 215, 0, 0.1); }
+    50% { box-shadow: 0 0 35px rgba(255, 215, 0, 0.8), inset 0 0 35px rgba(255, 215, 0, 0.2); }
+}
+
+.level-node.home .node-icon-box span {
+    color: #ffd700;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 1);
+}
+
+.level-node.home .node-name {
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+/* Boss Node */
+.level-node.boss .node-icon-box {
+    border-color: #ff0044;
+}
+
+.level-node.boss .node-icon-box span {
+    color: #ff0044;
+}
+
+/* Completed Nodes */
+.level-node.completed .node-icon-box {
+    border-color: #00ff66;
+    background: rgba(0,255,102,0.1);
+}
+
+.level-node.completed .node-icon-box span {
+    color: #00ff66;
+}
+
+.level-node.completed .node-status {
+    color: #00ff66;
+}
+
+/* Mission Panel */
+.mission-panel {
+    position: relative;
+    width: 700px; /* Wider for better reading */
+    max-width: 90%;
+    background: rgba(5, 5, 10, 0.98); /* Opaque background hides overlapping lines */
+    border: 1px solid var(--neon-cyan);
+    padding: 30px;
+    text-align: center;
+    clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); /* Strong shadow to separate layers */
+    pointer-events: auto;
+}
+
+.mission-panel h3 {
+    font-family: 'Orbitron', sans-serif;
+    color: #00fff9;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.mission-panel p {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.mission-reward {
+    color: #ffd700;
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 15px;
+}
+
+.start-mission-btn {
+    padding: 12px 50px;
+    background: linear-gradient(135deg, #00fff9, #0066ff);
+    border: none;
+    color: #000;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    transition: all 0.3s;
+}
+
+.start-mission-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0,255,249,0.5);
+}
+
+/* ================================
+   IMPROVED MISSION COMPLETE
+   ================================ */
+#mission-complete-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mission-complete-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+}
+
+.mission-complete-content {
+    position: relative;
+    text-align: center;
+    padding: 50px;
+    background: rgba(10,10,20,0.9);
+    border: 1px solid #00fff9;
+    clip-path: polygon(30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px);
+}
+
+.complete-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    color: #00fff9;
+    text-shadow: 0 0 30px rgba(0,255,249,0.5);
+    margin-bottom: 40px;
+    letter-spacing: 5px;
+}
+
+.complete-stats {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-bottom: 30px;
+}
+
+.complete-stat {
+    text-align: center;
+}
+
+.complete-stat .stat-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #666;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.complete-stat .stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    color: #00fff9;
+}
+
+.complete-stat .stat-value.gold {
+    color: #ffd700;
+}
+
+.complete-unlock {
+    color: #00ff66;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    margin-bottom: 30px;
+    padding: 10px 20px;
+    background: rgba(0,255,102,0.1);
+    border: 1px solid rgba(0,255,102,0.3);
+    display: inline-block;
+}
+
+.complete-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.complete-btn {
+    padding: 15px 30px;
+    background: transparent;
+    border: 1px solid #00fff9;
+    color: #00fff9;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.complete-btn:hover {
+    background: rgba(0,255,249,0.1);
+}
+
+.complete-btn.primary {
+    background: linear-gradient(135deg, #00fff9, #0066ff);
+    border: none;
+    color: #000;
+}
+
+.complete-btn.primary:hover {
+    box-shadow: 0 0 20px rgba(0,255,249,0.5);
+}
+
+#story-map-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+
+.story-map-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100vh; /* Force full screen height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Push elements apart */
+    align-items: center;
+    padding: 20px;
+    overflow: hidden; /* Prevent main page scrolling */
+}
+
+.story-title {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    color: #ffd700;
+    text-shadow: 0 0 30px rgba(255,215,0,0.5);
+    margin-bottom: 10px;
+}
+
+.story-subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+/* =============================================
+   FIX: HUD Gold Display (in-game)
+   ============================================= */
+.hud-gold {
+    position: absolute;
+    top: 20px;
+    right: 220px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.6);
+    padding: 8px 15px;
+    border: 1px solid rgba(255,215,0,0.5);
+    border-radius: 4px;
+}
+
+.hud-gold .gold-icon {
+    color: #ffd700;
+    font-size: 1rem;
+}
+
+.hud-gold #hud-gold-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    color: #ffd700;
+}
+
+/* =============================================
+   FIX: Hangar Gold Display
+   ============================================= */
+.hangar-gold {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px; /* Reduced from 30px */
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    color: #ffd700;
+    text-shadow: 0 0 20px rgba(255,215,0,0.5);
+}
+
+/* =============================================
+   FIX: Mech Card Locked State
+   ============================================= */
+.mech-card.locked {
+    opacity: 0.6;
+    position: relative;
+}
+
+.mech-card.locked::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    pointer-events: none;
+}
+
+.mech-price {
+    text-align: center;
+    padding: 8px;
+    margin-top: 10px;
+    background: rgba(255,215,0,0.2);
+    border: 1px solid #ffd700;
+    color: #ffd700;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+}
+
+.mech-selected-badge {
+    text-align: center;
+    padding: 8px;
+    margin-top: 10px;
+    background: rgba(0,255,249,0.2);
+    border: 1px solid #00fff9;
+    color: #00fff9;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+}
+
+/* =============================================
+   FIX: Mission Objectives positioning (no overlap)
+   ============================================= */
+#mission-objectives {
+    position: fixed;
+    top: 120px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px 20px;
+    border-left: 3px solid #00fff9;
+    min-width: 220px;
+    max-width: 300px;
+    z-index: 20;
+    pointer-events: none;
+}
+
+#mission-title {
+    color: #00fff9;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0,255,249,0.3);
+}
+
+#objective-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#objective-list li {
+    color: #ccc;
+    font-size: 0.85rem;
+    padding: 5px 0;
+    padding-left: 15px;
+    position: relative;
+}
+
+#objective-list li::before {
+    content: '○';
+    position: absolute;
+    left: 0;
+    color: #666;
+}
+
+#objective-list li.complete {
+    color: #00ff66;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+#objective-list li.complete::before {
+    content: '●';
+    color: #00ff66;
+}
+
+/* =============================================
+   FIX: Boss Health Bar (no overlap with objectives)
+   ============================================= */
+#boss-health-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    max-width: 500px;
+    text-align: center;
+    z-index: 30;
+    background: rgba(0,0,0,0.7);
+    padding: 15px;
+    border: 1px solid #ff0044;
+}
+
+#boss-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    color: #ff4444;
+    text-shadow: 0 0 10px #ff0000;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.boss-health-bar {
+    height: 15px;
+    background: #222;
+    border: 1px solid #ff4444;
+    overflow: hidden;
+}
+
+#boss-health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff0000, #ff4444);
+    transition: width 0.3s ease;
+}
+
+.boss-phase-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.boss-phase-indicators .phase {
+    width: 10px;
+    height: 10px;
+    border: 2px solid #ff4444;
+    border-radius: 50%;
+    background: transparent;
+}
+
+.boss-phase-indicators .phase.active {
+    background: #ff4444;
+    box-shadow: 0 0 8px #ff0000;
+}
+
+/* =============================================
+   FIX: Interaction Prompt (consistent position)
+   ============================================= */
+#interaction-prompt {
+    position: fixed;
+    bottom: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    padding: 12px 25px;
+    border: 1px solid #00fff9;
+    color: #00fff9;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    z-index: 50;
+}
+
+/* =============================================
+   FIX: Map Lines Better Visibility
+   ============================================= */
+.map-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.map-line {
+    stroke: #666;
+    stroke-width: 2;
+    stroke-linecap: round;
+    fill: none;
+    transition: stroke 0.3s, filter 0.3s;
+    opacity: 0.4;
+}
+
+.map-line.unlocked {
+    stroke: #c9a227;
+    stroke-width: 3;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 5px rgba(201, 162, 39, 0.5));
+    animation: pathGlow 2s ease-in-out infinite;
+}
+
+/* =============================================
+   FIX: Pause Menu Buttons
+   ============================================= */
+#pause-menu {
+    z-index: 150;
+}
+
+.pause-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.pause-btn {
+    width: 250px;
+    padding: 15px 30px;
+    background: transparent;
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pause-btn:hover {
+    background: var(--neon-cyan);
+    color: var(--bg-darker);
+    box-shadow: 0 0 30px var(--neon-cyan);
+}
+
+/* =============================================
+   FIX: Game Over z-index
+   ============================================= */
+#game-over {
+    z-index: 160;
+}
+
+/* =============================================
+   FIX: Mission Complete unlock text
+   ============================================= */
+.complete-unlock:empty {
+    display: none;
+}
+
+/* =============================================
+   FIX: Level Node click feedback
+   ============================================= */
+.level-node {
+    cursor: pointer;
+    user-select: none;
+}
+
+.level-node.locked {
+    cursor: not-allowed;
+}
+
+.level-node:active:not(.locked) {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+/* =============================================
+   FIX: Responsive adjustments
+   ============================================= */
+@media (max-width: 768px) {
+    .story-title {
+        font-size: 1.8rem;
+    }
+    
+    .mission-panel {
+        min-width: 300px;
+        padding: 20px;
+    }
+    
+    .complete-stats {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .complete-buttons {
+        flex-direction: column;
+    }
+    
+    .hud-gold {
+        right: 140px;
+        padding: 5px 10px;
+    }
+    
+    #boss-health-container {
+        width: 80%;
+    }
+    
+    #mission-objectives {
+        max-width: 200px;
+        font-size: 0.8rem;
+    }
+}
+/* Container for bottom UI elements */
+.story-ui-bottom {
+    height: 40%; /* Dedicated space for text */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center text box vertically in this space */
+    z-index: 20;
+    padding-top: 20px;
+}

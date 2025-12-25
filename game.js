@@ -8,10 +8,6 @@
 // GAME CONFIGURATION
 // ================================
 
-// ================================
-// GAME CONFIGURATION
-// ================================
-
 const CONFIG = {
     // NEW: Medieval theme
     GAME_TITLE: 'IRON KNIGHTS',
@@ -137,57 +133,149 @@ mechs: {
         building: 0x15152a
     },
 
-    /// Level Definitions with difficulty
-LEVELS: {
-    NEON_CITY: { 
-        name: 'Neon City (Home Base)', 
-        enemies: 0, 
-        boss: null, 
-        difficulty: 0,
-        isHome: true,
-        position: { x: 0, z: 0 }
+    /// Unified Level Definitions (Medieval Theme)
+    LEVELS: {
+        HOME_BASE: { 
+            name: 'Ironhold Stronghold', 
+            enemies: 0, 
+            boss: null, 
+            difficulty: 0,
+            isHome: true,
+            goldPerKill: 0,
+            position: { x: 0, z: 0 },
+            // Environment settings
+            skyColor: 0x2a2a3a,
+            groundColor: 0x333333,
+            fogColor: 0x1a1a2a,
+            fogDensity: 0.01,
+            ambientLight: 0x666688,
+            structures: [
+                { type: 'tower', count: 4 },
+                { type: 'wall_segment', count: 12 },
+                { type: 'armor_stand', count: 8 }
+            ],
+            spawnPoints: [{ x: 0, z: 0 }]
+        },
+        VILLAGE: { 
+            name: 'Ravenshollow Village', 
+            enemies: 8, 
+            boss: null, 
+            difficulty: 1,
+            goldPerKill: 15,
+            position: { x: 800, z: 0 },
+            // Environment settings
+            skyColor: 0x87ceeb,
+            groundColor: 0x567d46,
+            fogColor: 0xcccccc,
+            fogDensity: 0.01,
+            ambientLight: 0xffffff,
+            structures: [
+                { type: 'house', count: 8 },
+                { type: 'well', count: 1 },
+                { type: 'cart', count: 3 },
+                { type: 'fence', count: 15 }
+            ],
+            spawnPoints: [
+                { x: -30, z: -30 }, { x: 30, z: -30 },
+                { x: -30, z: 30 }, { x: 30, z: 30 }
+            ]
+        },
+        FOREST: { 
+            name: 'Darkwood Forest', 
+            enemies: 12, 
+            boss: 'FOREST_TROLL', 
+            difficulty: 1.5,
+            goldPerKill: 25,
+            position: { x: 1600, z: 0 },
+            // Environment settings
+            skyColor: 0x2d4a3e,
+            groundColor: 0x2d4a2d,
+            fogColor: 0x1a3320,
+            fogDensity: 0.03,
+            ambientLight: 0x446644,
+            structures: [
+                { type: 'tree', count: 50 },
+                { type: 'rock', count: 20 },
+                { type: 'fallen_log', count: 5 },
+                { type: 'clearing', count: 1 }
+            ],
+            spawnPoints: [
+                { x: -40, z: 0 }, { x: 40, z: 0 },
+                { x: 0, z: -40 }, { x: 0, z: 40 }
+            ]
+        },
+        CASTLE_GATES: { 
+            name: 'Castle Ironspire - Gates', 
+            enemies: 15, 
+            boss: null, 
+            difficulty: 2,
+            goldPerKill: 35,
+            position: { x: 2400, z: 0 },
+            // Environment settings
+            skyColor: 0x4a4a6a,
+            groundColor: 0x555555,
+            fogColor: 0x333344,
+            fogDensity: 0.015,
+            ambientLight: 0x8888aa,
+            structures: [
+                { type: 'wall_segment', count: 20 },
+                { type: 'tower', count: 4 },
+                { type: 'gate', count: 1 },
+                { type: 'barricade', count: 10 },
+                { type: 'siege_weapon', count: 2 }
+            ],
+            spawnPoints: [
+                { x: -50, z: 0 }, { x: 50, z: 0 }
+            ]
+        },
+        CASTLE_KEEP: { 
+            name: 'Castle Ironspire - Keep', 
+            enemies: 18, 
+            boss: 'BLACK_KNIGHT', 
+            difficulty: 2.5,
+            goldPerKill: 50,
+            position: { x: 2400, z: 800 },
+            // Environment settings
+            skyColor: 0x2a2a3a,
+            groundColor: 0x333333,
+            fogColor: 0x1a1a2a,
+            fogDensity: 0.02,
+            ambientLight: 0x666688,
+            structures: [
+                { type: 'pillar', count: 12 },
+                { type: 'throne_stairs', count: 1 },
+                { type: 'chandelier', count: 4 },
+                { type: 'banner', count: 8 },
+                { type: 'armor_stand', count: 6 }
+            ],
+            indoor: true,
+            spawnPoints: [{ x: 0, z: 0 }]
+        },
+        THRONE_ROOM: { 
+            name: 'Throne Room', 
+            enemies: 10, 
+            boss: 'DRAGON_MECH', 
+            difficulty: 3,
+            goldPerKill: 75,
+            position: { x: 2400, z: 1600 },
+            // Environment settings
+            skyColor: 0x1a0a0a,
+            groundColor: 0x2a1515,
+            fogColor: 0x330000,
+            fogDensity: 0.025,
+            ambientLight: 0xff4444,
+            structures: [
+                { type: 'throne', count: 1 },
+                { type: 'pillar_large', count: 8 },
+                { type: 'dragon_bones', count: 3 },
+                { type: 'fire_pit', count: 4 },
+                { type: 'royal_banner', count: 6 }
+            ],
+            indoor: true,
+            boss: 'DRAGON_MECH',
+            spawnPoints: [{ x: 0, z: 0 }]
+        }
     },
-    VILLAGE: { 
-        name: 'Ravenshollow Village', 
-        enemies: 8, 
-        boss: null, 
-        difficulty: 1,
-        goldPerKill: 15,
-        position: { x: 800, z: 0 }
-    },
-    FOREST: { 
-        name: 'Darkwood Forest', 
-        enemies: 12, 
-        boss: 'FOREST_TROLL', 
-        difficulty: 1.5,
-        goldPerKill: 25,
-        position: { x: 1600, z: 0 }
-    },
-    CASTLE_OUTER: { 
-        name: 'Castle Ironspire - Outer', 
-        enemies: 15, 
-        boss: null, 
-        difficulty: 2,
-        goldPerKill: 35,
-        position: { x: 2400, z: 0 }
-    },
-    CASTLE_INNER: { 
-        name: 'Castle Ironspire - Keep', 
-        enemies: 18, 
-        boss: 'BLACK_KNIGHT', 
-        difficulty: 2.5,
-        goldPerKill: 50,
-        position: { x: 2400, z: 800 }
-    },
-    THRONE_ROOM: { 
-        name: 'Throne Room', 
-        enemies: 10, 
-        boss: 'DRAGON_MECH', 
-        difficulty: 3,
-        goldPerKill: 75,
-        position: { x: 2400, z: 1600 }
-    }
-},
     
     // NEW: Mission types
     MISSIONS: {
@@ -199,15 +287,15 @@ LEVELS: {
     }
 };
 
-// ADD: Story and progression state
+// Story and progression state
 const GameProgression = {
-    currentLevel: 'VILLAGE',
+    currentLevel: 'HOME_BASE',
     currentMission: null,
     missionsCompleted: [],
     princesRescued: 0,
     totalPrinces: 3,
     homeBaseUnlocked: true,
-    unlockedLevels: ['VILLAGE'],
+    unlockedLevels: ['HOME_BASE', 'VILLAGE'],
     
     // Story missions
     storyMissions: [
@@ -231,20 +319,20 @@ const GameProgression = {
                 { type: 'rescue', target: 'princess_elena', complete: false }
             ],
             boss: 'FOREST_TROLL',
-            reward: { gold: 250, unlocks: 'CASTLE_OUTER', princess: 'elena' }
+            reward: { gold: 250, unlocks: 'CASTLE_GATES', princess: 'elena' }
         },
         {
             id: 'mission_3',
-            level: 'CASTLE_OUTER',
+            level: 'CASTLE_GATES',
             type: 'defend',
             title: 'Siege the Castle',
             description: 'Break through Castle Ironspire\'s outer defenses.',
             objectives: [{ type: 'survive_waves', count: 3, current: 0 }],
-            reward: { gold: 300, unlocks: 'CASTLE_INNER' }
+            reward: { gold: 300, unlocks: 'CASTLE_KEEP' }
         },
         {
             id: 'mission_4',
-            level: 'CASTLE_INNER', 
+            level: 'CASTLE_KEEP', 
             type: 'boss',
             title: 'The Black Knight',
             description: 'Defeat the legendary Black Knight and free Princess Aria.',
@@ -269,8 +357,6 @@ const GameProgression = {
     ]
 };
 
-// ADD: Boss class (add after your Enemy class)
-// REPLACE THE ENTIRE Boss CLASS WITH THIS:
 class Boss {
     constructor(type, position) {
         this.type = type;
@@ -535,6 +621,10 @@ class RescueTarget {
             if (GameState.keys['KeyE'] && !this.rescueTriggered) {
                 this.rescue();
             }
+        } else {
+            // Hide prompt when player moves away
+            const prompt = document.getElementById('interaction-prompt');
+            if (prompt) prompt.classList.add('hidden');
         }
     }
     
@@ -565,6 +655,7 @@ class RescueTarget {
 
 function showDialogue(speaker, lines) {
     const dialogueBox = document.getElementById('dialogue-box');
+    if (!dialogueBox) return;
     dialogueBox.classList.remove('hidden');
     let lineIndex = 0;
     
@@ -584,91 +675,15 @@ function showDialogue(speaker, lines) {
     dialogueBox.onclick = showNextLine;
 }
 
-// ADD: Level environments
-const LevelEnvironments = {
-    VILLAGE: {
-        skyColor: 0x87ceeb,
-        groundColor: 0x567d46,
-        fogColor: 0xcccccc,
-        fogDensity: 0.01,
-        structures: [
-            { type: 'house', count: 8 },
-            { type: 'well', count: 1 },
-            { type: 'cart', count: 3 },
-            { type: 'fence', count: 15 }
-        ],
-        ambientLight: 0xffffff,
-        spawnPoints: [
-            { x: -30, z: -30 }, { x: 30, z: -30 },
-            { x: -30, z: 30 }, { x: 30, z: 30 }
-        ]
-    },
-    FOREST: {
-        skyColor: 0x2d4a3e,
-        groundColor: 0x2d4a2d,
-        fogColor: 0x1a3320,
-        fogDensity: 0.03,
-        structures: [
-            { type: 'tree', count: 50 },
-            { type: 'rock', count: 20 },
-            { type: 'fallen_log', count: 5 },
-            { type: 'clearing', count: 1 }
-        ],
-        ambientLight: 0x446644,
-        spawnPoints: [
-            { x: -40, z: 0 }, { x: 40, z: 0 },
-            { x: 0, z: -40 }, { x: 0, z: 40 }
-        ]
-    },
-    CASTLE_OUTER: {
-        skyColor: 0x4a4a6a,
-        groundColor: 0x555555,
-        fogColor: 0x333344,
-        fogDensity: 0.015,
-        structures: [
-            { type: 'wall_segment', count: 20 },
-            { type: 'tower', count: 4 },
-            { type: 'gate', count: 1 },
-            { type: 'barricade', count: 10 },
-            { type: 'siege_weapon', count: 2 }
-        ],
-        ambientLight: 0x8888aa,
-        spawnPoints: [
-            { x: -50, z: 0 }, { x: 50, z: 0 }
-        ]
-    },
-    CASTLE_INNER: {
-        skyColor: 0x2a2a3a,
-        groundColor: 0x333333,
-        fogColor: 0x1a1a2a,
-        fogDensity: 0.02,
-        structures: [
-            { type: 'pillar', count: 12 },
-            { type: 'throne_stairs', count: 1 },
-            { type: 'chandelier', count: 4 },
-            { type: 'banner', count: 8 },
-            { type: 'armor_stand', count: 6 }
-        ],
-        ambientLight: 0x666688,
-        indoor: true
-    },
-    THRONE_ROOM: {
-        skyColor: 0x1a0a0a,
-        groundColor: 0x2a1515,
-        fogColor: 0x330000,
-        fogDensity: 0.025,
-        structures: [
-            { type: 'throne', count: 1 },
-            { type: 'pillar_large', count: 8 },
-            { type: 'dragon_bones', count: 3 },
-            { type: 'fire_pit', count: 4 },
-            { type: 'royal_banner', count: 6 }
-        ],
-        ambientLight: 0xff4444,
-        indoor: true,
-        boss: 'DRAGON_MECH'
-    }
-};
+function showInteractionPrompt(text) {
+    const prompt = document.getElementById('interaction-prompt');
+    if (!prompt) return;
+    const span = prompt.querySelector('span') || prompt;
+    span.textContent = text;
+    prompt.classList.remove('hidden');
+}
+
+// LevelEnvironments removed - now using unified CONFIG.LEVELS
 
 // ADD: Structure generators
 function generateStructure(type, position) {
@@ -775,7 +790,11 @@ function loadLevel(levelName) {
     // Clear existing level
     clearCurrentLevel();
     
-    const level = LevelEnvironments[levelName];
+    const level = CONFIG.LEVELS[levelName];
+    if (!level) {
+        console.error(`Level ${levelName} not found!`);
+        return;
+    }
     
     // Set sky and fog
     scene.background = new THREE.Color(level.skyColor);
@@ -842,6 +861,18 @@ function loadLevel(levelName) {
         currentBoss = new Boss(level.boss, { x: 0, z: -100 });
     } else {
         currentBoss = null;
+    }
+    
+    // Spawn rescue targets if mission requires it
+    rescueTargets = [];
+    if (GameProgression.currentMission) {
+        const mission = GameProgression.currentMission;
+        mission.objectives.forEach(obj => {
+            if (obj.type === 'rescue' && obj.target) {
+                const target = new RescueTarget(obj.target, { x: 50, z: -50 });
+                rescueTargets.push(target);
+            }
+        });
     }
 
     GameProgression.currentLevel = levelName;
@@ -1106,36 +1137,43 @@ function showMissionStartOverlay(mission) {
 }
 
 function updateHomeBaseUI() {
-    // Update gold display
-    document.getElementById('gold-display').textContent = GameState.player.score;
+    // Update gold display - FIXED: was using .score, now using .gold
+    const goldDisplay = document.getElementById('gold-display');
+    if (goldDisplay) goldDisplay.textContent = persistentGold;
     
     // Update upgrade buttons
     Object.keys(HomeBase.upgrades).forEach(station => {
         const upgrade = HomeBase.upgrades[station];
         const btn = document.getElementById(`upgrade-${station}`);
-        const cost = upgrade.level < upgrade.maxLevel ? upgrade.cost[upgrade.level] : 'MAX';
-        btn.textContent = `${station} (Lv.${upgrade.level}) - ${cost} Gold`;
-        btn.disabled = upgrade.level >= upgrade.maxLevel || GameState.player.score < upgrade.cost[upgrade.level];
+        if (btn) {
+            const cost = upgrade.level < upgrade.maxLevel ? upgrade.cost[upgrade.level] : 'MAX';
+            btn.textContent = `${station} (Lv.${upgrade.level}) - ${cost} Gold`;
+            btn.disabled = upgrade.level >= upgrade.maxLevel || persistentGold < upgrade.cost[upgrade.level];
+        }
     });
     
     // Update mission list
     const missionList = document.getElementById('mission-list');
-    missionList.innerHTML = '';
-    HomeBase.getAvailableMissions().forEach(mission => {
-        const missionEl = document.createElement('div');
-        missionEl.className = 'mission-item';
-        missionEl.innerHTML = `
-            <h4>${mission.title}</h4>
-            <p>${mission.description}</p>
-            <span class="reward">Reward: ${mission.reward.gold} Gold</span>
-            <button onclick="startMission('${mission.id}')">START</button>
-        `;
-        missionList.appendChild(missionEl);
-    });
+    if (missionList) {
+        missionList.innerHTML = '';
+        HomeBase.getAvailableMissions().forEach(mission => {
+            const missionEl = document.createElement('div');
+            missionEl.className = 'mission-item';
+            missionEl.innerHTML = `
+                <h4>${mission.title}</h4>
+                <p>${mission.description}</p>
+                <span class="reward">Reward: ${mission.reward.gold} Gold</span>
+                <button onclick="startMission('${mission.id}')">START</button>
+            `;
+            missionList.appendChild(missionEl);
+        });
+    }
     
     // Update rescued princesses display
-    document.getElementById('princesses-rescued').textContent = 
-        `${GameProgression.princesRescued}/${GameProgression.totalPrinces}`;
+    const princessDisplay = document.getElementById('princesses-rescued');
+    if (princessDisplay) {
+        princessDisplay.textContent = `${GameProgression.princesRescued}/${GameProgression.totalPrinces}`;
+    }
 }
 
 // ================================
@@ -1183,6 +1221,14 @@ const gameState = {
     paused: false
 };
 
+// Game Mode System
+const GameMode = {
+    current: 'story', // 'story' or 'free'
+    missionStartTime: 0,
+    sessionKills: 0,
+    sessionGold: 0
+};
+
 // ================================
 // THREE.JS SETUP
 // ================================
@@ -1214,6 +1260,41 @@ let player = {
     damage: 15
 };
 
+// Persistent gold storage (survives game restarts)
+let persistentGold = 0;
+
+// Save/Load system
+const SaveSystem = {
+    save() {
+        const data = {
+            gold: persistentGold,
+            unlockedMechs: Object.keys(CONFIG.mechs).filter(id => CONFIG.mechs[id].unlocked),
+            missionsCompleted: GameProgression.missionsCompleted,
+            unlockedLevels: GameProgression.unlockedLevels,
+            princessesRescued: GameProgression.princesRescued
+        };
+        localStorage.setItem('ironKnightsSave', JSON.stringify(data));
+    },
+    
+    load() {
+        const saved = localStorage.getItem('ironKnightsSave');
+        if (saved) {
+            const data = JSON.parse(saved);
+            persistentGold = data.gold || 0;
+            GameProgression.missionsCompleted = data.missionsCompleted || [];
+            GameProgression.unlockedLevels = data.unlockedLevels || ['HOME_BASE', 'VILLAGE'];
+            GameProgression.princesRescued = data.princessesRescued || 0;
+            
+            // Restore mech unlocks
+            if (data.unlockedMechs) {
+                data.unlockedMechs.forEach(mechId => {
+                    if (CONFIG.mechs[mechId]) CONFIG.mechs[mechId].unlocked = true;
+                });
+            }
+        }
+    }
+};
+
 // Helper function for lerp (linear interpolation)
 function lerp(a, b, t) {
     return a + (b - a) * t;
@@ -1224,6 +1305,7 @@ function lerp(a, b, t) {
 // ================================
 
 function init() {
+    SaveSystem.load(); // Load saved progress
     setupEventListeners();
     simulateLoading();
 }
@@ -1334,11 +1416,22 @@ function handleMenuAction(e) {
     const action = e.currentTarget.dataset.action;
     
     switch (action) {
+        case 'story-mode':
+            showScreen('story-map-screen');
+            updateStoryMap();
+            break;
+        case 'free-mode':
+            GameMode.current = 'free';
+            GameProgression.currentMission = null;
+            startGame();
+            break;
         case 'start':
             startGame();
             break;
         case 'hangar':
+            document.getElementById('mission-complete-screen')?.classList.add('hidden');
             showScreen('hangar-screen');
+            updateHangarUI();
             break;
         case 'controls':
             showScreen('controls-screen');
@@ -1347,23 +1440,109 @@ function handleMenuAction(e) {
             if (GameState.isPlaying) {
                 endGame();
             }
+            document.getElementById('mission-complete-screen')?.classList.add('hidden');
             showScreen('main-menu');
+            updateMenuGold();
             break;
         case 'resume':
             togglePause();
             break;
         case 'restart':
-            restartGame();
+            document.getElementById('game-over').classList.add('hidden');
+            if (GameMode.current === 'story' && GameProgression.currentMission) {
+                startStoryMission(GameProgression.currentMission);
+            } else {
+                GameMode.current = 'free';
+                startGame();
+            }
+            break;
+        case 'next-mission':
+            document.getElementById('mission-complete-screen').classList.add('hidden');
+            showScreen('story-map-screen');
+            updateStoryMap();
             break;
     }
 }
 
 function showScreen(screenId) {
-    ['loading-screen', 'main-menu', 'hangar-screen', 'controls-screen', 'game-container'].forEach(id => {
-        document.getElementById(id).classList.add('hidden');
+    ['loading-screen', 'main-menu', 'hangar-screen', 'controls-screen', 'game-container', 'story-map-screen', 'mission-complete-screen'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
     });
     document.getElementById(screenId).classList.remove('hidden');
     GameState.screen = screenId;
+    
+    if (screenId === 'main-menu') updateMenuGold();
+}
+
+function updateHangarUI() {
+    const hangarGold = document.getElementById('hangar-gold');
+    if (hangarGold) hangarGold.textContent = persistentGold;
+    
+    const mechSelection = document.getElementById('mech-selection');
+    if (!mechSelection) return;
+    
+    mechSelection.innerHTML = '';
+    
+    Object.keys(CONFIG.mechs).forEach(mechId => {
+        const mech = CONFIG.mechs[mechId];
+        const isSelected = GameState.selectedMech === mechId;
+        const isUnlocked = mech.unlocked;
+        const canBuy = !isUnlocked && persistentGold >= mech.price;
+        
+        const card = document.createElement('div');
+        card.className = `mech-card ${isSelected ? 'selected' : ''} ${!isUnlocked ? 'locked' : ''}`;
+        card.dataset.mech = mechId;
+        
+        card.innerHTML = `
+            <div class="mech-preview ${mechId}"></div>
+            <div class="mech-info">
+                <h3>${mech.name}</h3>
+                <div class="stat-bar"><span>SPEED</span><div class="bar"><div style="width:${mech.speed * 5}%"></div></div></div>
+                <div class="stat-bar"><span>ARMOR</span><div class="bar"><div style="width:${mech.health / 2}%"></div></div></div>
+                <div class="stat-bar"><span>POWER</span><div class="bar"><div style="width:${mech.damage * 3}%"></div></div></div>
+                ${!isUnlocked ? `<div class="mech-price">${mech.price} GOLD</div>` : ''}
+                ${isSelected ? '<div class="mech-selected-badge">EQUIPPED</div>' : ''}
+            </div>
+        `;
+        
+        // --- 1. CLICK LOGIC ---
+        card.onclick = () => {
+            if (isUnlocked) {
+                GameState.selectedMech = mechId;
+                updateHangarUI();
+            } else if (canBuy) {
+                persistentGold -= mech.price;
+                mech.unlocked = true;
+                GameState.selectedMech = mechId;
+                SaveSystem.save();
+                updateHangarUI();
+            }
+        };
+
+        // --- 2. RESTORED 3D TILT EFFECT LOGIC ---
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // Calculate rotation based on mouse position
+            const rotateX = (y - centerY) / 10;
+            const rotateY = (centerX - x) / 10;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px)`;
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            // Reset position on leave
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)`;
+        });
+
+        mechSelection.appendChild(card);
+    });
 }
 
 // ================================
@@ -1374,9 +1553,12 @@ function startGame() {
     showScreen('game-container');
     document.getElementById('pause-menu').classList.add('hidden');
     document.getElementById('game-over').classList.add('hidden');
+    document.getElementById('mission-objectives').classList.add('hidden');
     
-    // Reset game state
+    // Reset game state but PRESERVE gold
     const mechConfig = CONFIG.mechs[GameState.selectedMech];
+    const currentGold = persistentGold; // Preserve gold!
+    
     GameState.player = {
         health: mechConfig.health,
         maxHealth: mechConfig.health,
@@ -1386,11 +1568,16 @@ function startGame() {
         maxBoost: 100,
         ammo: 100,
         maxAmmo: 100,
-        gold: 0,
+        gold: currentGold, // Use preserved gold
         score: 0,
         kills: 0,
         wave: 1
     };
+    
+    // Reset session tracking
+    GameMode.sessionKills = 0;
+    GameMode.sessionGold = 0;
+    GameMode.missionStartTime = Date.now();
     
     GameState.isPlaying = true;
     GameState.isPaused = false;
@@ -1399,7 +1586,19 @@ function startGame() {
     initThreeJS();
     createWorld();
     createPlayer();
-    spawnEnemies(5);
+    
+    // Spawn enemies based on mode
+    if (GameMode.current === 'story' && GameProgression.currentMission) {
+        const enemyCount = GameProgression.currentMission.objectives.find(o => o.type === 'kill')?.count || 5;
+        spawnEnemies(enemyCount);
+        document.getElementById('mission-objectives').classList.remove('hidden');
+        updateObjectivesUI();
+    } else {
+        spawnEnemies(5);
+    }
+    
+    // Update HUD gold display
+    updateHUDGold();
     
     // Start game loop
     clock = new THREE.Clock();
@@ -1409,6 +1608,11 @@ function startGame() {
     setTimeout(() => {
         document.getElementById('game-canvas').requestPointerLock();
     }, 100);
+}
+
+function updateHUDGold() {
+    const el = document.getElementById('hud-gold-value');
+    if (el) el.textContent = GameState.player.gold || 0;
 }
 
 function initThreeJS() {
@@ -1459,7 +1663,7 @@ function initThreeJS() {
 
 function createWorld() {
     // Load the initial level defined in progression
-    loadLevel(GameProgression.currentLevel);
+    loadLevel(GameProgression.currentLevel || 'HOME_BASE');
     
     // Add skybox (global)
     createSkybox();
@@ -1661,16 +1865,6 @@ function createBuilding() {
     return group;
 }
 
-function createNPCs() {
-    npcs = [];
-    
-    for (let i = 0; i < CONFIG.world.npcCount; i++) {
-        const npc = createNPC();
-        npcs.push(npc);
-        scene.add(npc);
-    }
-}
-
 function createNPC() {
     const group = new THREE.Group();
     
@@ -1723,16 +1917,6 @@ function createNPC() {
     };
     
     return group;
-}
-
-function createVehicles() {
-    vehicles = [];
-    
-    for (let i = 0; i < CONFIG.world.vehicleCount; i++) {
-        const vehicle = createVehicle();
-        vehicles.push(vehicle);
-        scene.add(vehicle);
-    }
 }
 
 function createVehicle() {
@@ -2443,6 +2627,7 @@ function createPlayer() {
     sword.visible = false;
     playerMech.add(sword);
     playerMech.userData.meleeSword = sword;
+    sword.visible = false; // Ensure hidden by default
     scene.add(playerMech);
     
     // Initialize player movement
@@ -2808,33 +2993,43 @@ function updateProjectiles(delta) {
 
                     // 5. CHECK ENEMY DEATH
                     if (enemy.userData.health <= 0) {
+                        // Create explosion
                         createExplosion(enemy.position);
                         scene.remove(enemy);
                         enemies.splice(enemyIndex, 1);
-    
-                        // Calculate gold based on current level difficulty
-                        const levelConfig = CONFIG.LEVELS[GameProgression.currentLevel];
-                        const goldEarned = levelConfig ? levelConfig.goldPerKill || 10 : 10;
-    
-                        // Update Stats - ADD GOLD!
-                        GameState.player.gold += goldEarned;
-                        GameState.player.score += goldEarned;
+                        
+                        // Award points
+                        GameState.player.score += 100 * GameState.player.wave;
                         GameState.player.kills++;
-    
+                        GameMode.sessionKills++;
+
+                        // Award gold based on level
+                        const levelConfig = CONFIG.LEVELS[GameProgression.currentLevel];
+                        const goldEarned = levelConfig?.goldPerKill || 15;
+                        GameState.player.gold += goldEarned;
+                        persistentGold += goldEarned; // Also add to persistent
+                        GameMode.sessionGold += goldEarned;
+                        
+                        // Update HUD
+                        updateHUDGold();
+                        
                         // Show floating gold text
                         showFloatingText(`+${goldEarned}`, enemy.position);
-    
+
                         // Update mission objective
                         updateMissionObjective('kill', null);
-    
+
                         // Check for wave/mission completion
-                        if (enemies.length === 0 && GameProgression.currentMission) {
-                        // Mission enemies cleared - don't auto-spawn more
-                        } else if (enemies.length < 3) {
-                        // Spawn reinforcements in non-mission mode
-                            if (!GameProgression.currentMission) {
+                        if (GameMode.current === 'free') {
+                            // Free mode - always spawn more enemies, never end
+                            if (enemies.length < 5) {
                                 spawnEnemies(3);
                             }
+                        } else if (enemies.length === 0 && GameProgression.currentMission) {
+                            // Story mode - check if mission objectives complete
+                            checkMissionObjectives();
+                        } else if (enemies.length < 3 && !GameProgression.currentMission) {
+                            spawnEnemies(3);
                         }
                     }
                 }
@@ -3072,6 +3267,11 @@ function updatePlayer(delta) {
                         enemies.splice(index, 1);
                         GameState.player.score += 150 * GameState.player.wave; // Bonus for melee kill
                         GameState.player.kills++;
+                        // Add gold per kill
+                        const goldEarned = CONFIG.LEVELS[GameProgression.currentLevel]?.goldPerKill || 15;
+                        GameState.player.gold = (GameState.player.gold || 0) + goldEarned;
+                        GameMode.sessionKills++;
+                        GameMode.sessionGold += goldEarned;
                         
                         // Update mission objective
                         updateMissionObjective('kill', null);
@@ -3427,28 +3627,31 @@ function updateBossHealthUI() {
 }
 
 function checkMissionObjectives() {
+    // Don't check objectives in free mode
+    if (GameMode.current === 'free') return;
+    
     if (!GameProgression.currentMission) return;
     
     const mission = GameProgression.currentMission;
     let allComplete = true;
     
     mission.objectives.forEach(obj => {
-        // Logic depends on your tracking. 
-        // Example: 'kill' objectives tracking GameState.player.kills or a mission-specific counter
         if (obj.type === 'kill') {
-             // You need to track mission-specific kills separately or reset kills at mission start
-             if (obj.current < obj.count) allComplete = false; 
+            if ((obj.current || 0) < obj.count) allComplete = false;
         }
         if (obj.type === 'rescue' && !obj.complete) allComplete = false;
         if (obj.type === 'boss' && !obj.complete) allComplete = false;
-        if (obj.type === 'survive_waves' && obj.current < obj.count) allComplete = false;
+        if (obj.type === 'survive_waves' && (obj.current || 0) < obj.count) allComplete = false;
     });
     
     if (allComplete) {
-        completeMission(mission);
+        // Small delay before showing complete screen
+        setTimeout(() => {
+            showMissionComplete();
+        }, 1000);
     }
     
-    updateObjectivesUI(); // Ensure this function exists or create it
+    updateObjectivesUI();
 }
 
 function updateObjectivesUI() {
@@ -3573,14 +3776,31 @@ function showMissionCompleteOverlay(message, isEnding) {
 }
 
 function triggerEnding() {
-    showMissionCompleteOverlay('The Kingdom is Saved!\nAll Princesses Rescued!', true);
-}
-
-function triggerEnding() {
-    gameState.paused = true;
-    // Simple alert for now, you can make a dedicated screen
-    alert("VICTORY! The Kingdom is Saved!");
-    HomeBase.enterBase();
+    GameState.isPlaying = false;
+    document.exitPointerLock();
+    
+    // Show victory screen
+    const overlay = document.createElement('div');
+    overlay.innerHTML = `
+        <div style="text-align: center; color: #ffd700; font-family: 'Orbitron', sans-serif;">
+            <h1 style="font-size: 4rem; text-shadow: 0 0 50px #ffd700;">VICTORY!</h1>
+            <h2 style="color: #00fff9; margin: 2rem 0;">The Kingdom is Saved!</h2>
+            <p style="font-size: 1.5rem;">All Princesses Rescued</p>
+            <p style="margin-top: 2rem; color: #ffd700;">Total Gold: ${persistentGold}</p>
+            <button onclick="this.parentElement.parentElement.remove(); showScreen('main-menu'); updateMenuGold();" 
+                style="margin-top: 2rem; padding: 1rem 3rem; font-family: 'Orbitron'; font-size: 1.2rem; 
+                background: linear-gradient(135deg, #ffd700, #ff6b00); border: none; cursor: pointer;">
+                RETURN TO MENU
+            </button>
+        </div>
+    `;
+    overlay.style.cssText = `
+        position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+        display: flex; justify-content: center; align-items: center; z-index: 1000;
+    `;
+    document.body.appendChild(overlay);
+    
+    SaveSystem.save();
 }
 
 // ================================
@@ -3663,12 +3883,176 @@ function createMeleeSword(color) {
 }
 
 // ================================
+// GAME MODE & UI FUNCTIONS
+// ================================
+
+function updateMenuGold() {
+    const el = document.getElementById('menu-gold');
+    if (el) el.textContent = persistentGold;
+    
+    const hangarGold = document.getElementById('hangar-gold');
+    if (hangarGold) hangarGold.textContent = persistentGold;
+}
+
+
+function updateStoryMap() {
+    // Update nodes
+    document.querySelectorAll('.level-node').forEach(node => {
+        const levelId = node.dataset.level;
+        const isUnlocked = GameProgression.unlockedLevels.includes(levelId) || levelId === 'HOME_BASE';
+        const mission = GameProgression.storyMissions.find(m => m.level === levelId);
+        const isCompleted = mission && GameProgression.missionsCompleted.includes(mission.id);
+        
+        node.classList.remove('unlocked', 'locked', 'completed');
+        
+        if (levelId === 'HOME_BASE') {
+            node.classList.add('unlocked');
+        } else if (isCompleted) {
+            node.classList.add('completed', 'unlocked');
+        } else if (isUnlocked) {
+            node.classList.add('unlocked');
+        } else {
+            node.classList.add('locked');
+        }
+        
+        // Hide/show lock icon
+        const lockIcon = node.querySelector('.node-lock-icon');
+        if (lockIcon) lockIcon.style.display = isUnlocked ? 'none' : 'block';
+        
+        // Update status text
+        const statusEl = node.querySelector('.node-status');
+        if (statusEl) {
+            if (isCompleted) statusEl.textContent = 'COMPLETE';
+            else if (isUnlocked && levelId !== 'HOME_BASE') statusEl.textContent = 'AVAILABLE';
+            else statusEl.textContent = '';
+        }
+    });
+    
+    // Update connection lines (paths)
+    const pathConnections = [
+        { path: '1', requires: 'VILLAGE' },
+        { path: '2', requires: 'FOREST' },
+        { path: '3', requires: 'CASTLE_GATES' },
+        { path: '4', requires: 'CASTLE_KEEP' },
+        { path: '5', requires: 'THRONE_ROOM' }
+    ];
+    
+    pathConnections.forEach(({ path, requires }) => {
+        const pathEl = document.querySelector(`.map-path[data-path="${path}"]`);
+        if (pathEl && GameProgression.unlockedLevels.includes(requires)) {
+            pathEl.classList.add('unlocked');
+        } else if (pathEl) {
+            pathEl.classList.remove('unlocked');
+        }
+    });
+    
+    // Setup click handlers
+    document.querySelectorAll('.level-node').forEach(node => {
+        node.onclick = () => {
+            if (node.classList.contains('unlocked') || node.classList.contains('completed')) {
+                selectLevel(node.dataset.level);
+            }
+        };
+    });
+}
+
+function selectLevel(levelId) {
+    if (levelId === 'HOME_BASE') return;
+    
+    const mission = GameProgression.storyMissions.find(m => 
+        m.level === levelId && !GameProgression.missionsCompleted.includes(m.id)
+    );
+    
+    const title = document.getElementById('selected-mission-title');
+    const desc = document.getElementById('selected-mission-desc');
+    const reward = document.getElementById('mission-reward');
+    const btn = document.getElementById('start-mission-btn');
+    
+    if (mission) {
+        title.textContent = mission.title;
+        desc.textContent = mission.description;
+        reward.textContent = 'REWARD: ' + mission.reward.gold + ' GOLD';
+        btn.classList.remove('hidden');
+        btn.onclick = () => startStoryMission(mission);
+    } else {
+        title.textContent = CONFIG.LEVELS[levelId]?.name || levelId;
+        desc.textContent = 'Mission completed!';
+        reward.textContent = '';
+        btn.classList.add('hidden');
+    }
+}
+
+function startStoryMission(mission) {
+    GameMode.current = 'story';
+    GameMode.missionStartTime = Date.now();
+    GameMode.sessionKills = 0;
+    GameMode.sessionGold = 0;
+    
+    GameProgression.currentMission = mission;
+    GameProgression.currentLevel = mission.level;
+    
+    // Reset objectives
+    mission.objectives.forEach(obj => {
+        if (obj.current !== undefined) obj.current = 0;
+        if (obj.complete !== undefined) obj.complete = false;
+    });
+    
+    startGame();
+    
+    // Show mission objectives HUD
+    document.getElementById('mission-objectives').classList.remove('hidden');
+    updateObjectivesUI();
+}
+
+function showMissionComplete() {
+    const mission = GameProgression.currentMission;
+    if (!mission) return;
+    
+    GameState.isPlaying = false;
+    document.exitPointerLock();
+    
+    // Calculate time
+    const elapsed = Math.floor((Date.now() - GameMode.missionStartTime) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    
+    // Update UI
+    document.getElementById('complete-gold').textContent = '+' + mission.reward.gold;
+    document.getElementById('complete-kills').textContent = GameMode.sessionKills;
+    document.getElementById('complete-time').textContent = mins + ':' + secs.toString().padStart(2, '0');
+    
+    // Unlock info
+    const unlockEl = document.getElementById('complete-unlock');
+    if (mission.reward.unlocks) {
+        unlockEl.textContent = 'NEW AREA UNLOCKED: ' + (CONFIG.LEVELS[mission.reward.unlocks]?.name || mission.reward.unlocks);
+        unlockEl.style.display = 'block';
+        if (!GameProgression.unlockedLevels.includes(mission.reward.unlocks)) {
+            GameProgression.unlockedLevels.push(mission.reward.unlocks);
+        }
+    } else {
+        unlockEl.style.display = 'none';
+    }
+    
+    // Award gold to PERSISTENT storage
+    persistentGold += mission.reward.gold;
+    GameState.player.gold = persistentGold;
+    
+    // Mark complete
+    if (!GameProgression.missionsCompleted.includes(mission.id)) {
+        GameProgression.missionsCompleted.push(mission.id);
+    }
+    
+    // Save progress
+    SaveSystem.save();
+    
+    document.getElementById('mission-complete-screen').classList.remove('hidden');
+}
+
+// ================================
 // INITIALIZATION
 // ================================
 
-// Start the game when page loads
 window.addEventListener('load', () => {
     init();
     initMinimap();
 });
-
