@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRON KNIGHTS | Medieval Mech Warfare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loader-content">
+            <div class="mech-loader">
+                <div class="loader-ring"></div>
+                <div class="loader-ring"></div>
+                <div class="loader-ring"></div>
+                <div class="loader-core"></div>
+            </div>
+            <h1 class="game-title">IRON KNIGHTS</h1>
+            <p class="loading-text">INITIALIZING BATTLE SYNC<span class="dots">...</span></p>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-menu" class="hidden">
+        <div class="menu-bg"></div>
+        <div class="menu-content">
+            <div class="title-container">
+                <div class="title-glow"></div>
+                <h1 class="main-title">IRON<span class="title-accent">KNIGHTS</span></h1>
+                <p class="subtitle">MEDIEVAL MECH WARFARE • 1287 AD</p>
+            </div>
+            <nav class="menu-nav">
+                <button class="menu-btn" data-action="start">
+                    <span class="btn-icon">▶</span>
+                    <span class="btn-text">DEPLOY MECH</span>
+                    <span class="btn-glow"></span>
+                </button>
+                <button class="menu-btn" data-action="hangar">
+                    <span class="btn-icon">◆</span>
+                    <span class="btn-text">ROYAL ARMORY</span>
+                    <span class="btn-glow"></span>
+                </button>
+                <button class="menu-btn" data-action="controls">
+                    <span class="btn-icon">⌘</span>
+                    <span class="btn-text">CONTROLS</span>
+                    <span class="btn-glow"></span>
+                </button>
+            </nav>
+            <div class="menu-footer">
+                <p>© 1287 ROYAL ARMORY INDUSTRIES</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="hangar-screen" class="hidden">
+        <div class="hangar-bg"></div>
+        <button class="back-btn" data-action="menu">← BACK</button>
+        <div class="hangar-content">
+            <h2 class="hangar-title">ROYAL ARMORY</h2>
+            <div class="mech-selection">
+                <div class="mech-card selected" data-mech="striker">
+                    <div class="mech-preview striker"></div>
+                    <div class="mech-info">
+                        <h3>VANGUARD-X7</h3>
+                        <div class="stat-bar"><span>SPEED</span><div class="bar"><div style="width:85%"></div></div></div>
+                        <div class="stat-bar"><span>ARMOR</span><div class="bar"><div style="width:60%"></div></div></div>
+                        <div class="stat-bar"><span>POWER</span><div class="bar"><div style="width:75%"></div></div></div>
+                    </div>
+                </div>
+                <div class="mech-card" data-mech="titan">
+                    <div class="mech-preview titan"></div>
+                    <div class="mech-info">
+                        <h3>COLOSSUS-MK3</h3>
+                        <div class="stat-bar"><span>SPEED</span><div class="bar"><div style="width:50%"></div></div></div>
+                        <div class="stat-bar"><span>ARMOR</span><div class="bar"><div style="width:95%"></div></div></div>
+                        <div class="stat-bar"><span>POWER</span><div class="bar"><div style="width:90%"></div></div></div>
+                    </div>
+                </div>
+                <div class="mech-card" data-mech="phantom">
+                    <div class="mech-preview phantom"></div>
+                    <div class="mech-info">
+                        <h3>WRAITH-V</h3>
+                        <div class="stat-bar"><span>SPEED</span><div class="bar"><div style="width:95%"></div></div></div>
+                        <div class="stat-bar"><span>ARMOR</span><div class="bar"><div style="width:40%"></div></div></div>
+                        <div class="stat-bar"><span>POWER</span><div class="bar"><div style="width:70%"></div></div></div>
+                    </div>
+                </div>
+                <div class="mech-card" data-mech="juggernaut">
+                    <div class="mech-preview juggernaut"></div>
+                    <div class="mech-info">
+                        <h3>WARLORD-Z</h3>
+                        <div class="stat-bar"><span>SPEED</span><div class="bar"><div style="width:35%"></div></div></div>
+                        <div class="stat-bar"><span>ARMOR</span><div class="bar"><div style="width:100%"></div></div></div>
+                        <div class="stat-bar"><span>POWER</span><div class="bar"><div style="width:100%"></div></div></div>
+                    </div>
+                </div>
+                <div class="mech-card" data-mech="blade">
+                    <div class="mech-preview blade"></div>
+                    <div class="mech-info">
+                        <h3>DUELIST-R9</h3>
+                        <div class="stat-bar"><span>SPEED</span><div class="bar"><div style="width:100%"></div></div></div>
+                        <div class="stat-bar"><span>ARMOR</span><div class="bar"><div style="width:45%"></div></div></div>
+                        <div class="stat-bar"><span>POWER</span><div class="bar"><div style="width:80%"></div></div></div>
+                    </div>
+                </div>
+                <div class="mech-card" data-mech="paladin">
+                    <div class="mech-preview paladin"></div>
+                    <div class="mech-info">
+                        <h3>PALADIN-KN</h3>
+                        <div class="stat-bar"><span>SPEED</span><div class="bar"><div style="width:65%"></div></div></div>
+                        <div class="stat-bar"><span>ARMOR</span><div class="bar"><div style="width:90%"></div></div></div>
+                        <div class="stat-bar"><span>POWER</span><div class="bar"><div style="width:75%"></div></div></div>
+                    </div>
+                </div>
+            </div>
+            <button class="deploy-btn" data-action="start">MOUNT ARMOR</button>
+        </div>
+    </div>
+
+    <div id="controls-screen" class="hidden">
+        <div class="controls-bg"></div>
+        <button class="back-btn" data-action="menu">← BACK</button>
+        <div class="controls-content">
+            <h2 class="controls-title">PILOT CONTROLS</h2>
+            <div class="controls-grid">
+                <div class="control-item">
+                    <div class="key">W A S D</div>
+                    <span>MOVEMENT</span>
+                </div>
+                <div class="control-item">
+                    <div class="key">MOUSE</div>
+                    <span>AIM / LOOK</span>
+                </div>
+                <div class="control-item">
+                    <div class="key">LEFT CLICK</div>
+                    <span>PRIMARY FIRE</span>
+                </div>
+                <div class="control-item">
+                    <div class="key">RIGHT CLICK</div>
+                    <span>SECONDARY FIRE</span>
+                </div>
+                <div class="control-item">
+                    <div class="key">SPACE</div>
+                    <span>BOOST / FLY</span>
+                </div>
+                <div class="control-item">
+                    <div class="key">SHIFT</div>
+                    <span>SPRINT</span>
+                </div>
+                <div class="control-item">
+                    <div class="key">E</div>
+                    <span>SPECIAL ABILITY / INTERACT</span>
+                </div>
+                <div class="control-item">
+                    <div class="key">R</div>
+                    <span>RELOAD</span>
+                </div>
+                <div class="control-item">
+                    <div class="key">Q</div>
+                    <span>MELEE ATTACK</span>
+                </div>
+                <div class="control-item">
+                    <div class="key">V</div>
+                    <span>TOGGLE POV</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden">
+        <canvas id="game-canvas"></canvas>
+        
+        <div id="hud">
+            <div class="hud-left">
+                <div class="health-container">
+                    <div class="health-icon">♥</div>
+                    <div class="health-bar">
+                        <div class="health-fill" id="health-fill"></div>
+                        <span class="health-text" id="health-text">100</span>
+                    </div>
+                </div>
+                <div class="shield-container">
+                    <div class="shield-icon">◇</div>
+                    <div class="shield-bar">
+                        <div class="shield-fill" id="shield-fill"></div>
+                        <span class="shield-text" id="shield-text">100</span>
+                    </div>
+                </div>
+                <div class="boost-container">
+                    <div class="boost-icon">▲</div>
+                    <div class="boost-bar">
+                        <div class="boost-fill" id="boost-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-center">
+                <div class="crosshair">
+                    <div class="crosshair-dot"></div>
+                    <div class="crosshair-ring"></div>
+                </div>
+                <div class="target-info hidden" id="target-info">
+                    <span class="target-name" id="target-name">ENEMY MECH</span>
+                    <div class="target-health-bar">
+                        <div class="target-health-fill" id="target-health-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-right">
+                <div class="weapon-display">
+                    <div class="weapon-icon" id="weapon-icon">⬡</div>
+                    <div class="weapon-info">
+                        <span class="weapon-name" id="weapon-name">PLASMA CANNON</span>
+                        <span class="ammo-count"><span id="ammo-current">30</span> / <span id="ammo-max">30</span></span>
+                    </div>
+                </div>
+                <div class="ability-display">
+                    <div class="ability-icon" id="ability-icon">◈</div>
+                    <div class="ability-cooldown" id="ability-cooldown"></div>
+                </div>
+            </div>
+
+            <div class="hud-bottom">
+                <div class="score-display">
+                    <span class="score-label">SCORE</span>
+                    <span class="score-value" id="score-value">0</span>
+                </div>
+                <div class="kills-display">
+                    <span class="kills-label">KILLS</span>
+                    <span class="kills-value" id="kills-value">0</span>
+                </div>
+                <div class="wave-display">
+                    <span class="wave-label">WAVE</span>
+                    <span class="wave-value" id="wave-value">1</span>
+                </div>
+            </div>
+
+            <div class="minimap">
+                <canvas id="minimap-canvas"></canvas>
+                <div class="minimap-border"></div>
+            </div>
+
+            <div class="damage-indicator left hidden"></div>
+            <div class="damage-indicator right hidden"></div>
+            <div class="damage-indicator top hidden"></div>
+            <div class="damage-indicator bottom hidden"></div>
+        </div>
+
+        <div id="home-base-screen" class="hidden">
+            <div class="home-base-bg"></div>
+            <div class="home-base-content">
+                <h2>IRON KNIGHT STRONGHOLD</h2>
+                
+                <div class="gold-display">
+                    <span>⬡</span> <span id="gold-display">0</span> GOLD
+                </div>
+                
+                <div class="princesses-display">
+                    PRINCESSES RESCUED: <span id="princesses-rescued">0/3</span>
+                </div>
+                
+                <div class="base-sections">
+                    <div class="upgrade-section">
+                        <h3>UPGRADES</h3>
+                        <button id="upgrade-healthStation" class="upgrade-btn" onclick="HomeBase.upgrade('healthStation')">Health Station</button>
+                        <button id="upgrade-armorStation" class="upgrade-btn" onclick="HomeBase.upgrade('armorStation')">Armor Station</button>
+                        <button id="upgrade-weaponForge" class="upgrade-btn" onclick="HomeBase.upgrade('weaponForge')">Weapon Forge</button>
+                    </div>
+                    
+                    <div class="mission-section">
+                        <h3>MISSION BOARD</h3>
+                        <div id="mission-list">
+                            </div>
+                    </div>
+                </div>
+                
+                <button class="deploy-btn" onclick="HomeBase.leaveBase()">RETURN TO BATTLE</button>
+            </div>
+        </div>
+
+        <div id="dialogue-box" class="hidden">
+            <div class="dialogue-portrait"></div>
+            <div class="dialogue-content">
+                <span id="dialogue-speaker">???</span>
+                <p id="dialogue-text"></p>
+                <span class="dialogue-hint">Click to continue...</span>
+            </div>
+        </div>
+
+        <div id="boss-health-container" class="hidden">
+            <span id="boss-name">BOSS NAME</span>
+            <div class="boss-health-bar">
+                <div id="boss-health-fill" style="width: 100%;"></div>
+            </div>
+            <div class="boss-phase-indicators">
+                <span class="phase active"></span>
+                <span class="phase"></span>
+                <span class="phase"></span>
+            </div>
+        </div>
+
+        <div id="mission-objectives">
+            <h4 id="mission-title">MISSION</h4>
+            <ul id="objective-list"></ul>
+        </div>
+
+        <div id="interaction-prompt" class="hidden">
+            <span>Press E to Interact</span>
+        </div>
+
+        <div id="pause-menu" class="hidden">
+            <div class="pause-overlay"></div>
+            <div class="pause-content">
+                <h2>PAUSED</h2>
+                <button class="pause-btn" data-action="resume">RESUME</button>
+                <button class="pause-btn" data-action="menu">MAIN MENU</button>
+            </div>
+        </div>
+
+        <div id="game-over" class="hidden">
+            <div class="game-over-overlay"></div>
+            <div class="game-over-content">
+                <h2 class="game-over-title">MECH DESTROYED</h2>
+                <div class="final-stats">
+                    <div class="stat"><span>FINAL SCORE</span><span id="final-score">0</span></div>
+                    <div class="stat"><span>KILLS</span><span id="final-kills">0</span></div>
+                    <div class="stat"><span>WAVES SURVIVED</span><span id="final-waves">0</span></div>
+                </div>
+                <button class="restart-btn" data-action="restart">DEPLOY AGAIN</button>
+                <button class="menu-btn-small" data-action="menu">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="music-menu" loop></audio>
+    <audio id="music-game" loop></audio>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
