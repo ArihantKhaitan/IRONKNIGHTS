@@ -134,79 +134,195 @@
         </div>
     </div>
 
-    <!-- STORY MAP SCREEN - FIXED -->
+    <!-- STORY MAP SCREEN - REFINED LAYOUT -->
     <div id="story-map-screen" class="hidden">
         <div class="story-map-bg"></div>
         
-        <div class="story-map-content">
-            <h2 class="story-title">KINGDOM OF IRONSPIRE</h2>
-            <p class="story-subtitle">Select your mission</p>
-            
-            <div class="world-map">
-                <!-- Country Map Background -->
-                <div class="map-background">
-                    <svg class="map-terrain" viewBox="0 0 1000 600" preserveAspectRatio="none">
-                        <!-- Mountains -->
-                        <path d="M 0 400 Q 200 300 400 350 T 800 320 L 1000 300 L 1000 600 L 0 600 Z" 
-                              fill="#3a4a3a" opacity="0.3" class="terrain-mountains"/>
-                        <!-- Forests -->
-                        <path d="M 300 500 Q 500 450 700 480 T 1000 460 L 1000 600 L 300 600 Z" 
-                              fill="#2d4a2d" opacity="0.4" class="terrain-forest"/>
-                        <!-- Plains/Roads -->
-                        <path d="M 0 550 L 1000 500 L 1000 600 L 0 600 Z" 
-                              fill="#567d46" opacity="0.2" class="terrain-plains"/>
-                        <!-- Path lines connecting locations -->
-                        <path d="M 120 300 L 250 300" class="map-path" data-path="1"/>
-                        <path d="M 280 300 L 450 250" class="map-path" data-path="2"/>
-                        <path d="M 480 250 L 650 250" class="map-path" data-path="3"/>
-                        <path d="M 680 250 L 800 350" class="map-path" data-path="4"/>
-                        <path d="M 680 250 L 900 150" class="map-path" data-path="5"/>
-                    </svg>
+        <!-- Main Layout Container -->
+        <div class="map-layout">
+            <!-- Left Side: Map Area -->
+            <div class="map-area">
+                <!-- Header -->
+                <div class="map-header">
+                    <h2 class="story-title">KINGDOM OF IRONSPIRE</h2>
+                    <p class="story-subtitle">Select your mission</p>
                 </div>
                 
-                <!-- Level Nodes positioned on map -->
-                <div class="level-node home" data-level="HOME_BASE" style="left:12%; top:50%;">
-                    <div class="node-icon-box"><span>🏰</span></div>
-                    <span class="node-name">Ironhold Stronghold</span>
-                    <span class="node-status">HOME</span>
-                </div>
-                <div class="level-node unlocked" data-level="VILLAGE" style="left:25%; top:50%;">
-                    <div class="node-icon-box"><span>II</span></div>
-                    <span class="node-name">Ravenshollow Village</span>
-                    <span class="node-status">START</span>
-                </div>
-                <div class="level-node locked" data-level="FOREST" style="left:45%; top:42%;">
-                    <div class="node-icon-box"><span>III</span></div>
-                    <span class="node-name">Darkwood Forest</span>
-                    <span class="node-lock-icon">🔒</span>
-                </div>
-                <div class="level-node locked" data-level="CASTLE_GATES" style="left:65%; top:42%;">
-                    <div class="node-icon-box"><span>IV</span></div>
-                    <span class="node-name">Castle Gates</span>
-                    <span class="node-lock-icon">🔒</span>
-                </div>
-                <div class="level-node locked" data-level="CASTLE_KEEP" style="left:80%; top:58%;">
-                    <div class="node-icon-box"><span>V</span></div>
-                    <span class="node-name">Castle Keep</span>
-                    <span class="node-lock-icon">🔒</span>
-                </div>
-                <div class="level-node locked boss" data-level="THRONE_ROOM" style="left:90%; top:25%;">
-                    <div class="node-icon-box"><span>VI</span></div>
-                    <span class="node-name">Throne Room</span>
-                    <span class="node-lock-icon">🔒</span>
-                </div>
-            </div>
-
-            <div class="story-ui-bottom">
-                <div class="mission-panel" id="mission-panel">
-                    <h3 id="selected-mission-title">Select a Location</h3>
-                    <p id="selected-mission-desc">Click on an unlocked location to begin your mission.</p>
-                    <div class="mission-reward" id="mission-reward"></div>
-                    <button class="start-mission-btn hidden" id="start-mission-btn">START MISSION</button>
+                <!-- Map Container - Larger -->
+                <div class="map-container">
+                    <svg class="kingdom-map-svg" viewBox="0 0 900 700" preserveAspectRatio="xMidYMid meet">
+                        <!-- Definitions -->
+                        <defs>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                            <linearGradient id="landGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#2a4a3a"/>
+                                <stop offset="100%" style="stop-color:#1a3a2a"/>
+                            </linearGradient>
+                        </defs>
+                        
+                        <!-- Ocean Background -->
+                        <rect x="0" y="0" width="900" height="700" fill="#0a1520"/>
+                        
+                        <!-- Water texture lines -->
+                        <g class="water-lines" opacity="0.08">
+                            <path d="M0 100 Q225 80 450 100 T900 90" stroke="#00fff9" fill="none"/>
+                            <path d="M0 250 Q225 230 450 250 T900 240" stroke="#00fff9" fill="none"/>
+                            <path d="M0 450 Q225 470 450 450 T900 460" stroke="#00fff9" fill="none"/>
+                            <path d="M0 600 Q225 620 450 600 T900 610" stroke="#00fff9" fill="none"/>
+                        </g>
+                        
+                        <!-- Main Island - Larger and better positioned -->
+                        <path class="main-island" d="
+                            M 280 80
+                            Q 380 40, 500 60
+                            Q 620 50, 680 100
+                            Q 750 150, 770 250
+                            Q 790 350, 760 450
+                            Q 720 550, 620 620
+                            Q 500 680, 360 680
+                            Q 220 670, 150 580
+                            Q 80 490, 80 380
+                            Q 80 270, 130 180
+                            Q 180 100, 280 80
+                            Z" 
+                            fill="url(#landGradient)" 
+                            stroke="#4a6a5a" 
+                            stroke-width="2"
+                            filter="url(#glow)"/>
+                        
+                        <!-- Mountains -->
+                        <g class="mountains" opacity="0.5">
+                            <path d="M320 200 L370 120 L420 200 L470 140 L520 210 L460 220 L380 215 Z" fill="#3a5a4a"/>
+                            <path d="M420 350 L470 270 L520 350 L490 365 L440 360 Z" fill="#3a5a4a"/>
+                            <path d="M550 280 L590 220 L630 280 L600 290 Z" fill="#3a5a4a"/>
+                        </g>
+                        
+                        <!-- Forests -->
+                        <g class="forests" opacity="0.4">
+                            <ellipse cx="280" cy="480" rx="70" ry="50" fill="#1d3a1d"/>
+                            <ellipse cx="550" cy="380" rx="50" ry="35" fill="#1d3a1d"/>
+                            <ellipse cx="350" cy="350" rx="45" ry="30" fill="#1d3a1d"/>
+                            <ellipse cx="200" cy="350" rx="40" ry="30" fill="#1d3a1d"/>
+                        </g>
+                        
+                        <!-- Secondary Island (future) -->
+                        <path d="
+                            M 750 500
+                            Q 800 470, 860 490
+                            Q 920 520, 930 580
+                            Q 920 640, 860 670
+                            Q 800 690, 750 660
+                            Q 710 620, 720 560
+                            Q 730 520, 750 500
+                            Z" 
+                            fill="#1a2a1a" 
+                            stroke="#2a3a2a" 
+                            opacity="0.35"/>
+                        <text x="830" y="580" fill="#333" font-size="11" text-anchor="middle" font-family="Orbitron">COMING SOON</text>
+                        
+                        <!-- Path Lines connecting locations -->
+                        <g class="map-paths">
+                            <path d="M 220 560 Q 280 500 340 440" class="map-path" data-path="1"/>
+                            <path d="M 370 410 Q 430 360 490 320" class="map-path" data-path="2"/>
+                            <path d="M 520 290 Q 570 250 620 220" class="map-path" data-path="3"/>
+                            <path d="M 620 190 Q 580 150 530 120" class="map-path" data-path="4"/>
+                            <path d="M 500 110 Q 440 90 380 85" class="map-path" data-path="5"/>
+                        </g>
+                        
+                        <!-- Compass -->
+                        <g class="compass" transform="translate(820, 120)">
+                            <circle cx="0" cy="0" r="35" fill="rgba(0,0,0,0.5)" stroke="#c9a227" stroke-width="1.5"/>
+                            <polygon points="0,-25 5,0 0,25 -5,0" fill="#c9a227"/>
+                            <polygon points="-25,0 0,5 25,0 0,-5" fill="#8a7217"/>
+                            <circle cx="0" cy="0" r="6" fill="#c9a227"/>
+                            <text x="0" y="-38" text-anchor="middle" fill="#c9a227" font-size="12" font-family="Orbitron">N</text>
+                        </g>
+                    </svg>
+                    
+                    <!-- Level Nodes - Repositioned for larger map -->
+                    <div class="map-nodes">
+                        <div class="level-node home" data-level="HOME_BASE" style="left: 24%; top: 80%;">
+                            <div class="node-marker"><span>🏰</span></div>
+                            <div class="node-info">
+                                <span class="node-name">Ironhold Stronghold</span>
+                                <span class="node-status">HOME</span>
+                            </div>
+                        </div>
+                        
+                        <div class="level-node" data-level="VILLAGE" style="left: 38%; top: 62%;">
+                            <div class="node-marker"><span>II</span></div>
+                            <div class="node-info">
+                                <span class="node-name">Ravenshollow Village</span>
+                                <span class="node-status"></span>
+                            </div>
+                            <span class="lock-icon">🔒</span>
+                        </div>
+                        
+                        <div class="level-node" data-level="FOREST" style="left: 54%; top: 45%;">
+                            <div class="node-marker"><span>III</span></div>
+                            <div class="node-info">
+                                <span class="node-name">Darkwood Forest</span>
+                                <span class="node-status"></span>
+                            </div>
+                            <span class="lock-icon">🔒</span>
+                        </div>
+                        
+                        <div class="level-node" data-level="CASTLE_GATES" style="left: 68%; top: 30%;">
+                            <div class="node-marker"><span>IV</span></div>
+                            <div class="node-info">
+                                <span class="node-name">Castle Gates</span>
+                                <span class="node-status"></span>
+                            </div>
+                            <span class="lock-icon">🔒</span>
+                        </div>
+                        
+                        <div class="level-node" data-level="CASTLE_KEEP" style="left: 58%; top: 16%;">
+                            <div class="node-marker"><span>V</span></div>
+                            <div class="node-info">
+                                <span class="node-name">Castle Keep</span>
+                                <span class="node-status"></span>
+                            </div>
+                            <span class="lock-icon">🔒</span>
+                        </div>
+                        
+                        <div class="level-node" data-level="THRONE_ROOM" style="left: 42%; top: 10%;">
+                            <div class="node-marker"><span>VI</span></div>
+                            <div class="node-info">
+                                <span class="node-name">Throne Room</span>
+                                <span class="node-status"></span>
+                            </div>
+                            <span class="lock-icon">🔒</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <button class="deploy-btn" data-action="menu" style="margin-top: 20px;">BACK TO MENU</button>
+            <!-- Right Sidebar: Mission Panel -->
+            <div class="mission-sidebar">
+                <div class="sidebar-header">
+                    <h3>MISSION BRIEFING</h3>
+                </div>
+                
+                <div class="sidebar-content">
+                    <div class="mission-details">
+                        <h4 id="selected-mission-title">Select a Location</h4>
+                        <p id="selected-mission-desc">Click on an unlocked location on the map to view mission details.</p>
+                        <div class="reward-box" id="mission-reward"></div>
+                    </div>
+                    
+                    <button class="start-btn hidden" id="start-mission-btn">BEGIN MISSION</button>
+                </div>
+                
+                <div class="sidebar-footer">
+                    <button class="deploy-btn" data-action="menu">BACK TO MENU</button>
+                </div>
+            </div>
         </div>
     </div>
 

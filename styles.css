@@ -1934,70 +1934,87 @@ body {
 }
 
 /* ================================
-   IMPROVED STORY MAP
+   KINGDOM MAP - SIDEBAR LAYOUT
    ================================ */
+
+#story-map-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    overflow: hidden;
+}
+
 .story-map-bg {
     position: absolute;
     inset: 0;
-    background: 
-        radial-gradient(ellipse at 30% 70%, rgba(0,100,150,0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 30%, rgba(150,0,100,0.15) 0%, transparent 50%),
-        linear-gradient(180deg, #050510 0%, #0a0a1a 100%);
+    background: linear-gradient(135deg, #050510 0%, #0a1520 50%, #051015 100%);
 }
 
-.world-map {
-    width: 100%;
-    height: 60%;
+/* Main Layout - Map Left, Sidebar Right */
+.map-layout {
     position: relative;
-    margin-bottom: 0;
-    z-index: 5;
-    background: 
-        radial-gradient(ellipse at 30% 40%, rgba(100, 150, 100, 0.1) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 60%, rgba(150, 100, 50, 0.1) 0%, transparent 50%),
-        linear-gradient(180deg, #1a2a1a 0%, #2a3a2a 50%, #1a1a2a 100%);
-    border: 2px solid rgba(201, 162, 39, 0.3);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    z-index: 1;
+}
+
+/* Left: Map Area */
+.map-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px 10px 15px 20px;
+}
+
+.map-header {
+    text-align: center;
+    padding: 5px 0 10px 0;
+    flex-shrink: 0;
+}
+
+.story-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    color: #ffd700;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    margin: 0;
+    letter-spacing: 5px;
+}
+
+.story-subtitle {
+    color: #555;
+    font-size: 0.8rem;
+    margin-top: 3px;
+    letter-spacing: 2px;
+}
+
+/* Map Container - Takes up remaining space */
+.map-container {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    background: rgba(10, 21, 32, 0.5);
+    border: 1px solid rgba(201, 162, 39, 0.2);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
 }
 
-/* Country Map Background */
-.map-background {
-    position: absolute;
-    inset: 0;
+.kingdom-map-svg {
     width: 100%;
     height: 100%;
-    z-index: 1;
-    pointer-events: none;
+    max-height: 100%;
 }
 
-.map-terrain {
-    width: 100%;
-    height: 100%;
-    opacity: 0.6;
-}
-
-.terrain-mountains {
-    fill: #4a5a4a;
-    opacity: 0.4;
-}
-
-.terrain-forest {
-    fill: #2d4a2d;
-    opacity: 0.5;
-}
-
-.terrain-plains {
-    fill: #567d46;
-    opacity: 0.3;
-}
-
-/* Path Lines */
+/* Map Paths */
 .map-path {
-    stroke: #666;
+    stroke: #333;
     stroke-width: 2;
     fill: none;
-    stroke-dasharray: 5 3;
+    stroke-dasharray: 8 4;
     opacity: 0.4;
     transition: all 0.5s ease;
 }
@@ -2005,316 +2022,358 @@ body {
 .map-path.unlocked {
     stroke: #c9a227;
     stroke-width: 3;
-    opacity: 0.8;
-    filter: drop-shadow(0 0 5px rgba(201, 162, 39, 0.5));
     stroke-dasharray: none;
+    opacity: 1;
+    filter: drop-shadow(0 0 6px rgba(201, 162, 39, 0.7));
     animation: pathGlow 2s ease-in-out infinite;
 }
 
 @keyframes pathGlow {
-    0%, 100% { opacity: 0.6; }
+    0%, 100% { opacity: 0.7; }
     50% { opacity: 1; }
 }
 
-/* Level Nodes - Country Map Style */
+/* Map Nodes Container */
+.map-nodes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* Level Nodes */
 .level-node {
     position: absolute;
     transform: translate(-50%, -50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
     cursor: pointer;
+    pointer-events: auto;
     transition: all 0.3s ease;
-    z-index: 10;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
-.node-icon-box {
-    width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,30,0.9) 100%);
-    border: 3px solid #333;
-    border-radius: 12px;
+.node-marker {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #1a1a2a 0%, #0a0a15 100%);
+    border: 2px solid #333;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.7);
 }
 
-.node-icon-box::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.level-node:hover .node-icon-box::before {
-    opacity: 1;
-}
-
-.node-icon-box span {
+.node-marker span {
+    font-size: 1.1rem;
+    color: #444;
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.5rem;
-    color: #666;
-    z-index: 1;
-    position: relative;
-    text-shadow: 0 0 10px rgba(0,0,0,0.8);
+}
+
+.node-info {
+    margin-top: 6px;
+    text-align: center;
 }
 
 .node-name {
-    font-size: 0.75rem;
-    color: #666;
+    display: block;
+    font-size: 0.6rem;
+    color: #555;
     text-transform: uppercase;
     letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+    white-space: nowrap;
 }
 
 .node-status {
-    font-size: 0.6rem;
+    display: block;
+    font-size: 0.5rem;
     color: #00ff66;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+    margin-top: 2px;
 }
 
-.node-lock-icon {
+.lock-icon {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    color: #ff6600;
+    top: -3px;
+    right: 5px;
     font-size: 0.8rem;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8));
 }
 
-/* Unlocked Nodes */
-.level-node.unlocked .node-icon-box {
+/* HOME NODE */
+.level-node.home .node-marker {
+    width: 55px;
+    height: 55px;
+    border-color: #00fff9;
+    background: linear-gradient(135deg, rgba(0, 255, 249, 0.15) 0%, #0a0a15 100%);
+    box-shadow: 0 0 20px rgba(0, 255, 249, 0.4);
+    animation: homePulse 2s ease-in-out infinite;
+}
+
+.level-node.home .node-marker span {
+    font-size: 1.4rem;
+}
+
+.level-node.home .node-name {
+    color: #00fff9;
+}
+
+.level-node.home .node-status {
+    color: #00fff9;
+}
+
+@keyframes homePulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 249, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(0, 255, 249, 0.6); }
+}
+
+/* UNLOCKED NODES */
+.level-node.unlocked .node-marker {
     border-color: #c9a227;
-    box-shadow: 0 0 20px rgba(201, 162, 39, 0.4), inset 0 0 20px rgba(201, 162, 39, 0.1);
-    background: linear-gradient(135deg, rgba(201, 162, 39, 0.2) 0%, rgba(0,0,0,0.9) 100%);
+    background: linear-gradient(135deg, rgba(201, 162, 39, 0.15) 0%, #0a0a15 100%);
+    box-shadow: 0 0 15px rgba(201, 162, 39, 0.4);
 }
 
-.level-node.unlocked .node-icon-box span {
+.level-node.unlocked .node-marker span {
     color: #c9a227;
-    text-shadow: 0 0 15px rgba(201, 162, 39, 0.8);
+    text-shadow: 0 0 8px rgba(201, 162, 39, 0.7);
 }
 
 .level-node.unlocked .node-name {
     color: #c9a227;
-    text-shadow: 0 0 10px rgba(201, 162, 39, 0.5);
+}
+
+.level-node.unlocked .lock-icon {
+    display: none;
 }
 
 .level-node.unlocked:hover {
-    transform: translate(-50%, -50%) scale(1.15);
+    transform: translate(-50%, -50%) scale(1.1);
 }
 
-.level-node.unlocked:hover .node-icon-box {
-    box-shadow: 0 0 30px rgba(201, 162, 39, 0.7), inset 0 0 30px rgba(201, 162, 39, 0.2);
-    border-color: #ffd700;
+.level-node.unlocked:hover .node-marker {
+    box-shadow: 0 0 25px rgba(201, 162, 39, 0.7);
 }
 
-/* Home Node */
-.level-node.home .node-icon-box {
-    border-color: #ffd700;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5), inset 0 0 25px rgba(255, 215, 0, 0.1);
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(0,0,0,0.9) 100%);
-    animation: homePulse 2s ease-in-out infinite;
-}
-
-@keyframes homePulse {
-    0%, 100% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.5), inset 0 0 25px rgba(255, 215, 0, 0.1); }
-    50% { box-shadow: 0 0 35px rgba(255, 215, 0, 0.8), inset 0 0 35px rgba(255, 215, 0, 0.2); }
-}
-
-.level-node.home .node-icon-box span {
-    color: #ffd700;
-    text-shadow: 0 0 20px rgba(255, 215, 0, 1);
-}
-
-.level-node.home .node-name {
-    color: #ffd700;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-}
-
-/* Boss Node */
-.level-node.boss .node-icon-box {
-    border-color: #ff0044;
-}
-
-.level-node.boss .node-icon-box span {
-    color: #ff0044;
-}
-
-/* Completed Nodes */
-.level-node.completed .node-icon-box {
+/* COMPLETED NODES */
+.level-node.completed .node-marker {
     border-color: #00ff66;
-    background: rgba(0,255,102,0.1);
+    background: linear-gradient(135deg, rgba(0, 255, 102, 0.15) 0%, #0a0a15 100%);
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
 }
 
-.level-node.completed .node-icon-box span {
+.level-node.completed .node-marker span {
     color: #00ff66;
 }
 
-.level-node.completed .node-status {
+.level-node.completed .node-name {
     color: #00ff66;
 }
 
-/* Mission Panel */
-.mission-panel {
-    position: relative;
-    width: 700px; /* Wider for better reading */
-    max-width: 90%;
-    background: rgba(5, 5, 10, 0.98); /* Opaque background hides overlapping lines */
-    border: 1px solid var(--neon-cyan);
-    padding: 30px;
-    text-align: center;
-    clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); /* Strong shadow to separate layers */
-    pointer-events: auto;
+.level-node.completed .lock-icon {
+    display: none;
 }
 
-.mission-panel h3 {
+/* LOCKED NODES */
+.level-node.locked {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.level-node.locked .node-marker {
+    border-color: #222;
+}
+
+.level-node.locked .node-name {
+    color: #333;
+}
+
+/* Right Sidebar */
+.mission-sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: rgba(5, 5, 15, 0.95);
+    border-left: 1px solid rgba(201, 162, 39, 0.3);
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+}
+
+.sidebar-header h3 {
     font-family: 'Orbitron', sans-serif;
-    color: #00fff9;
-    font-size: 1.1rem;
-    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: #c9a227;
+    margin: 0;
+    letter-spacing: 3px;
 }
 
-.mission-panel p {
-    color: #888;
-    font-size: 0.9rem;
-    margin-bottom: 15px;
+.sidebar-content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
-.mission-reward {
+.mission-details {
+    flex: 1;
+}
+
+.mission-details h4 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    color: #fff;
+    margin: 0 0 12px 0;
+}
+
+.mission-details p {
+    color: #666;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 0 0 15px 0;
+}
+
+.reward-box {
     color: #ffd700;
     font-family: 'Orbitron', sans-serif;
-    margin-bottom: 15px;
+    font-size: 0.85rem;
+    padding: 10px 12px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 4px;
+    display: none;
 }
 
-.start-mission-btn {
-    padding: 12px 50px;
-    background: linear-gradient(135deg, #00fff9, #0066ff);
+.reward-box:not(:empty) {
+    display: block;
+}
+
+.start-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #c9a227, #ffd700);
     border: none;
     color: #000;
     font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
     font-weight: bold;
     cursor: pointer;
-    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
-    transition: all 0.3s;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    margin-top: 15px;
 }
 
-.start-mission-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(0,255,249,0.5);
+.start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(201, 162, 39, 0.5);
 }
 
-/* ================================
-   IMPROVED MISSION COMPLETE
-   ================================ */
-#mission-complete-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 300;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.mission-complete-bg {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.95);
-}
-
-.mission-complete-content {
-    position: relative;
-    text-align: center;
-    padding: 50px;
-    background: rgba(10,10,20,0.9);
-    border: 1px solid #00fff9;
-    clip-path: polygon(30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px);
-}
-
-.complete-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 2.5rem;
-    color: #00fff9;
-    text-shadow: 0 0 30px rgba(0,255,249,0.5);
-    margin-bottom: 40px;
-    letter-spacing: 5px;
-}
-
-.complete-stats {
-    display: flex;
-    justify-content: center;
-    gap: 60px;
-    margin-bottom: 30px;
-}
-
-.complete-stat {
-    text-align: center;
-}
-
-.complete-stat .stat-label {
-    display: block;
-    font-size: 0.7rem;
-    color: #666;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-}
-
-.complete-stat .stat-value {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 2rem;
-    color: #00fff9;
-}
-
-.complete-stat .stat-value.gold {
-    color: #ffd700;
-}
-
-.complete-unlock {
-    color: #00ff66;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.9rem;
-    margin-bottom: 30px;
-    padding: 10px 20px;
-    background: rgba(0,255,102,0.1);
-    border: 1px solid rgba(0,255,102,0.3);
-    display: inline-block;
-}
-
-.complete-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-}
-
-.complete-btn {
-    padding: 15px 30px;
-    background: transparent;
-    border: 1px solid #00fff9;
-    color: #00fff9;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.complete-btn:hover {
-    background: rgba(0,255,249,0.1);
-}
-
-.complete-btn.primary {
-    background: linear-gradient(135deg, #00fff9, #0066ff);
+/* Back button same as Royal Armory */
+.sidebar-footer .deploy-btn {
+    width: 100%;
+    padding: 15px 40px;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
     border: none;
-    color: #000;
+    color: var(--bg-darker);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
 }
 
-.complete-btn.primary:hover {
-    box-shadow: 0 0 20px rgba(0,255,249,0.5);
+.sidebar-footer .deploy-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 
+        0 0 20px var(--neon-cyan),
+        0 0 40px rgba(0, 255, 249, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .map-layout {
+        flex-direction: column;
+    }
+    
+    .map-area {
+        padding: 10px;
+        padding-bottom: 0;
+    }
+    
+    .story-title {
+        font-size: 1.3rem;
+    }
+    
+    .map-container {
+        flex: 1;
+        min-height: 250px;
+    }
+    
+    .mission-sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-height: 180px;
+        border-left: none;
+        border-top: 1px solid rgba(201, 162, 39, 0.3);
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .sidebar-header {
+        display: none;
+    }
+    
+    .sidebar-content {
+        flex: 1;
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 15px;
+    }
+    
+    .mission-details {
+        flex: 1;
+    }
+    
+    .mission-details h4 {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+    }
+    
+    .mission-details p {
+        font-size: 0.75rem;
+        margin-bottom: 8px;
+    }
+    
+    .start-btn {
+        width: auto;
+        margin-top: 0;
+        padding: 10px 25px;
+    }
+    
+    .sidebar-footer {
+        padding: 12px;
+        border-top: none;
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .sidebar-footer .deploy-btn {
+        padding: 12px 20px;
+        font-size: 0.8rem;
+    }
 }
 
 #story-map-screen {

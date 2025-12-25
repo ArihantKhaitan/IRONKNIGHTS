@@ -3189,91 +3189,110 @@ function updatePlayer(delta) {
     const mechConfig = CONFIG.mechs[GameState.selectedMech];
     
     // 1. POV TOGGLE (Press V)
-    if (GameState.keys['KeyV']) {
+    if (GameState.keys['KeyV'] && !GameState.povCooldown) {
         GameState.cameraMode = GameState.cameraMode === 'thirdPerson' ? 'firstPerson' : 'thirdPerson';
-        GameState.keys['KeyV'] = false; // Prevent rapid switching
+        GameState.povCooldown = true;
+        
+        // Hide/show mech in first person
+        playerMech.visible = GameState.cameraMode === 'thirdPerson';
+        
+        setTimeout(() => { GameState.povCooldown = false; }, 300);
     }
 
     // 2. MOVEMENT SPEEDS
     const baseSpeed = GameState.isBoosting ? mechConfig.boostSpeed : mechConfig.speed;
     const currentSpeed = GameState.keys['ShiftLeft'] ? baseSpeed * 1.5 : baseSpeed;
 
-    // 3. DIRECTIONAL INPUT
-    const moveVector = new THREE.Vector3();
-    if (GameState.keys['KeyW']) moveVector.z -= 1;
-    if (GameState.keys['KeyS']) moveVector.z += 1;
-    if (GameState.keys['KeyA']) moveVector.x -= 1;
-    if (GameState.keys['KeyD']) moveVector.x += 1;
-    moveVector.normalize();
+    // 3. MECH ROTATION - Always follows mouse horizontal look
+    playerMech.rotation.y = -GameState.mouse.x;
+    
+    // 4. DIRECTIONAL INPUT - Get raw input
+    let inputX = 0;
+    let inputZ = 0;
+    if (GameState.keys['KeyW']) inputZ = -1;
+    if (GameState.keys['KeyS']) inputZ = 1;
+    if (GameState.keys['KeyA']) inputX = -1;
+    if (GameState.keys['KeyD']) inputX = 1;
 
-    // 4. FLIGHT/HEIGHT LOGIC
-    let verticalInput = 0;
+    // 5. CREATE MOVEMENT VECTOR RELATIVE TO MECH'S FACING DIRECTION
+    // This ensures WASD always moves relative to where the mech is facing
+    const forward = new THREE.Vector3(0, 0, -1);
+    const right = new THREE.Vector3(1, 0, 0);
+    
+    // Apply mech's rotation to get world-space directions
+    forward.applyQuaternion(playerMech.quaternion);
+    right.applyQuaternion(playerMech.quaternion);
+    
+    // Calculate final movement direction
+    const moveDirection = new THREE.Vector3();
+    moveDirection.addScaledVector(forward, -inputZ); // W/S
+    moveDirection.addScaledVector(right, inputX);    // A/D
+    
+    if (moveDirection.length() > 0) {
+        moveDirection.normalize();
+    }
+
+    // 6. FLIGHT/HEIGHT LOGIC
+    let verticalVelocity = 0;
     if (GameState.keys['Space'] && GameState.player.boost > 0) {
         GameState.isBoosting = true;
         GameState.isFlying = true;
-        verticalInput = 1;
+        verticalVelocity = 15;
         GameState.player.boost = Math.max(0, GameState.player.boost - 30 * delta);
         createBoostParticle();
     } else {
         GameState.isBoosting = false;
-        verticalInput = -0.5; 
-        if (playerMech.userData.flyingHeight <= 0) GameState.isFlying = false;
+        if (playerMech.userData.flyingHeight > 0) {
+            verticalVelocity = -10; // Gravity
+        } else {
+            GameState.isFlying = false;
+        }
     }
+    
+    // Regenerate boost when grounded
     if (!GameState.isFlying && GameState.player.boost < GameState.player.maxBoost) {
         GameState.player.boost = Math.min(GameState.player.maxBoost, GameState.player.boost + 20 * delta);
     }
     
-    if (GameState.isBoosting) {
-        playerMech.userData.flyingHeight = Math.min(50, playerMech.userData.flyingHeight + 15 * delta);
-    } else {
-        playerMech.userData.flyingHeight = Math.max(0, playerMech.userData.flyingHeight - 10 * delta);
-    }
+    // Update flying height
+    playerMech.userData.flyingHeight = Math.max(0, Math.min(50, 
+        playerMech.userData.flyingHeight + verticalVelocity * delta
+    ));
+    
+    // 7. APPLY MOVEMENT
+    playerMech.position.x += moveDirection.x * currentSpeed * delta;
+    playerMech.position.z += moveDirection.z * currentSpeed * delta;
     playerMech.position.y = playerMech.userData.flyingHeight;
 
-    // 5. SHOOTER ROTATION (Mech faces where camera looks)
-    playerMech.rotation.y = -GameState.mouse.x;
-    const pitch = -GameState.mouse.y; // Used for camera look
-
-    // 6. CALCULATE MOVEMENT RELATIVE TO MECH FACING
-    const move = new THREE.Vector3();
-    move.copy(moveVector).applyQuaternion(playerMech.quaternion);
-    if (GameState.isFlying) move.y = verticalInput * 0.5;
-    
-    playerMech.position.add(move.multiplyScalar(currentSpeed * delta));
-
-    // 7. MELEE (Q) - Now deals damage!
+    // 8. MELEE (Q) - Deals damage
     const sword = playerMech.userData.meleeSword;
     if (GameState.keys['KeyQ']) {
         if (sword) {
             sword.visible = true;
             sword.rotation.x = Math.PI/2 + Math.sin(Date.now() * 0.015) * 1.5;
             
-            // Check for enemies in melee range and deal damage
+            // Check for enemies in melee range
             enemies.forEach((enemy, index) => {
                 const dist = playerMech.position.distanceTo(enemy.position);
-                if (dist < 5) { // Melee range
-                    const mechConfig = CONFIG.mechs[GameState.selectedMech];
-                    enemy.userData.health -= mechConfig.damage * 2 * delta; // Double damage for melee
+                if (dist < 5) {
+                    enemy.userData.health -= mechConfig.damage * 2 * delta;
                     
-                    // Create hit sparks
                     if (Math.random() > 0.7) {
                         createHitEffect(enemy.position, mechConfig.color);
                     }
                     
-                    // Check if enemy dies
                     if (enemy.userData.health <= 0) {
                         createExplosion(enemy.position);
                         scene.remove(enemy);
                         enemies.splice(index, 1);
-                        GameState.player.score += 150 * GameState.player.wave; // Bonus for melee kill
+                        GameState.player.score += 150 * GameState.player.wave;
                         GameState.player.kills++;
-                        // Add gold per kill
                         const goldEarned = CONFIG.LEVELS[GameProgression.currentLevel]?.goldPerKill || 15;
                         GameState.player.gold = (GameState.player.gold || 0) + goldEarned;
+                        persistentGold += goldEarned;
                         GameMode.sessionKills++;
                         GameMode.sessionGold += goldEarned;
-                        
-                        // Update mission objective
+                        updateHUDGold();
                         updateMissionObjective('kill', null);
                     }
                 }
@@ -3283,33 +3302,54 @@ function updatePlayer(delta) {
         sword.visible = false;
     }
 
-    // ABILITY (E) - Keep this unchanged
+    // ABILITY (E)
     if (GameState.keys['KeyE'] && GameState.abilityCooldown <= 0) {
         createExplosion(playerMech.position); 
         GameState.abilityCooldown = 5; 
     }
 
-    // 8. CAMERA MODES (Third Person vs First Person)
-    let camTargetPos = new THREE.Vector3();
-    let lookAtOffset = new THREE.Vector3();
-
+    // 9. CAMERA POSITIONING
+    const pitch = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, -GameState.mouse.y)); // Clamp pitch
+    
     if (GameState.cameraMode === 'firstPerson') {
-        // Cockpit view
-        camTargetPos.set(0, 3.5, 0.5).applyQuaternion(playerMech.quaternion).add(playerMech.position);
-        lookAtOffset.set(0, 3.5, 10).applyQuaternion(playerMech.quaternion).add(playerMech.position);
-        lookAtOffset.y += Math.sin(pitch) * 10; // Vertical look
+        // FIRST PERSON - Camera inside cockpit, mech hidden
+        const cockpitOffset = new THREE.Vector3(0, 3.5, 0.8);
+        cockpitOffset.applyQuaternion(playerMech.quaternion);
+        
+        const targetCamPos = playerMech.position.clone().add(cockpitOffset);
+        camera.position.lerp(targetCamPos, 0.3);
+        
+        // Look direction based on mech facing + pitch
+        const lookDistance = 50;
+        const lookTarget = new THREE.Vector3(0, 0, -lookDistance);
+        lookTarget.applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch);
+        lookTarget.applyQuaternion(playerMech.quaternion);
+        lookTarget.add(playerMech.position);
+        lookTarget.y += 3.5; // Match cockpit height
+        
+        camera.lookAt(lookTarget);
+        
     } else {
-        // Over the shoulder view
-        const backOffset = new THREE.Vector3(2, 6, 12).applyQuaternion(playerMech.quaternion);
-        camTargetPos.copy(playerMech.position).add(backOffset);
-        lookAtOffset.copy(playerMech.position).add(new THREE.Vector3(0, 4, 0));
-        lookAtOffset.add(new THREE.Vector3(0, Math.sin(pitch) * 10, 0)); // Look up/down
+        // THIRD PERSON - Over the shoulder view
+        const cameraDistance = 12;
+        const cameraHeight = 6;
+        const cameraOffset = 2; // Shoulder offset
+        
+        // Calculate camera position behind and above the mech
+        const backOffset = new THREE.Vector3(cameraOffset, cameraHeight, cameraDistance);
+        backOffset.applyQuaternion(playerMech.quaternion);
+        
+        const targetCamPos = playerMech.position.clone().add(backOffset);
+        camera.position.lerp(targetCamPos, 0.15);
+        
+        // Look at point in front of mech, adjusted for pitch
+        const lookTarget = playerMech.position.clone();
+        lookTarget.y += 4 + Math.sin(pitch) * 8;
+        
+        camera.lookAt(lookTarget);
     }
 
-    camera.position.lerp(camTargetPos, 0.2);
-    camera.lookAt(lookAtOffset);
-
-    // 9. SHOOTING
+    // 10. SHOOTING
     if (GameState.isShooting) shootProjectile();
 }
 
@@ -3957,16 +3997,23 @@ function updateStoryMap() {
 }
 
 function selectLevel(levelId) {
-    if (levelId === 'HOME_BASE') return;
-    
-    const mission = GameProgression.storyMissions.find(m => 
-        m.level === levelId && !GameProgression.missionsCompleted.includes(m.id)
-    );
-    
     const title = document.getElementById('selected-mission-title');
     const desc = document.getElementById('selected-mission-desc');
     const reward = document.getElementById('mission-reward');
     const btn = document.getElementById('start-mission-btn');
+    
+    // Handle HOME_BASE - show description instead of returning
+    if (levelId === 'HOME_BASE') {
+        title.textContent = 'Ironhold Stronghold';
+        desc.textContent = 'Your home base and headquarters. Here you can repair your mech, resupply ammunition, and plan your next mission. The ancient stronghold has stood for centuries, protecting the realm from invaders.';
+        reward.textContent = '';
+        btn.classList.add('hidden');
+        return;
+    }
+    
+    const mission = GameProgression.storyMissions.find(m => 
+        m.level === levelId && !GameProgression.missionsCompleted.includes(m.id)
+    );
     
     if (mission) {
         title.textContent = mission.title;
@@ -3976,7 +4023,7 @@ function selectLevel(levelId) {
         btn.onclick = () => startStoryMission(mission);
     } else {
         title.textContent = CONFIG.LEVELS[levelId]?.name || levelId;
-        desc.textContent = 'Mission completed!';
+        desc.textContent = 'Mission completed! This area has been secured.';
         reward.textContent = '';
         btn.classList.add('hidden');
     }
