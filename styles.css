@@ -124,13 +124,12 @@ body {
     font-family: var(--font-display);
     font-size: 3rem;
     font-weight: 900;
-    letter-spacing: 0.5em;
-    color: var(--neon-cyan);
-    text-shadow: 
-        0 0 10px var(--neon-cyan),
-        0 0 20px var(--neon-cyan),
-        0 0 40px var(--neon-cyan),
-        0 0 80px var(--neon-cyan);
+    letter-spacing: 0.3em;
+    background: linear-gradient(90deg, var(--neon-cyan) 0%, var(--neon-cyan) 45%, var(--neon-magenta) 55%, var(--neon-magenta) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 10px var(--neon-cyan)) drop-shadow(0 0 20px var(--neon-magenta));
     margin-bottom: 20px;
 }
 
@@ -1993,44 +1992,41 @@ body {
 .map-container {
     flex: 1;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     min-height: 0;
     background: rgba(10, 21, 32, 0.5);
-    border: 1px solid rgba(201, 162, 39, 0.2);
-    border-radius: 8px;
-    overflow: hidden;
 }
 
 .kingdom-map-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    max-height: 100%;
 }
 
 /* Map Paths */
 .map-path {
-    stroke: #333;
-    stroke-width: 2;
+    stroke: #555;
+    stroke-width: 0.5;
     fill: none;
-    stroke-dasharray: 8 4;
-    opacity: 0.4;
+    stroke-linecap: round;
+    stroke-dasharray: 2 1;
+    opacity: 0.5;
     transition: all 0.5s ease;
 }
 
 .map-path.unlocked {
     stroke: #c9a227;
-    stroke-width: 3;
+    stroke-width: 0.8;
     stroke-dasharray: none;
     opacity: 1;
-    filter: drop-shadow(0 0 6px rgba(201, 162, 39, 0.7));
+    filter: drop-shadow(0 0 3px rgba(201, 162, 39, 0.8));
     animation: pathGlow 2s ease-in-out infinite;
 }
 
 @keyframes pathGlow {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; filter: drop-shadow(0 0 5px rgba(201, 162, 39, 1)); }
 }
 
 /* Map Nodes Container */
@@ -2764,4 +2760,75 @@ body {
     align-items: center; /* Center text box vertically in this space */
     z-index: 20;
     padding-top: 20px;
+}
+/* =============================================
+   MAP COMPASS - Fixed aspect ratio
+   ============================================= */
+.map-compass {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.compass-n {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    color: #c9a227;
+    text-shadow: 0 0 8px rgba(201, 162, 39, 0.8);
+    font-weight: bold;
+    z-index: 5;
+}
+
+.compass-rose {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #c9a227;
+    position: relative;
+    box-shadow: 0 0 15px rgba(201, 162, 39, 0.3);
+}
+
+.compass-arrow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.compass-arrow.ns {
+    width: 4px;
+    height: 30px;
+    background: linear-gradient(to bottom, #c9a227 50%, #5a4a17 50%);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.compass-arrow.ew {
+    width: 30px;
+    height: 4px;
+    background: linear-gradient(to right, #8a7a27 50%, #3a3017 50%);
+    clip-path: polygon(0% 50%, 50% 0%, 100% 50%, 50% 100%);
+}
+
+.compass-rose::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: #c9a227;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #c9a227;
 }

@@ -1756,12 +1756,14 @@ function createBuilding() {
     const depth = 15 + Math.random() * 30;
     const height = 30 + Math.random() * 100;
     
-    // Main building body
+    // Main building body - Dark with metallic finish
     const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
     const buildingMaterial = new THREE.MeshStandardMaterial({
-        color: CONFIG.colors.building,
-        roughness: 0.7,
-        metalness: 0.5
+        color: 0x0a0a1a,
+        roughness: 0.3,
+        metalness: 0.8,
+        emissive: 0x050510,
+        emissiveIntensity: 0.2
     });
     const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
     building.position.y = height / 2;
@@ -1807,29 +1809,62 @@ function createBuilding() {
         group.add(edge);
     });
     
-    // Windows (emissive boxes)
-    const windowMaterial = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: Math.random() * 0.5 + 0.3
-    });
-    
+    // Windows (emissive neon panels)
+    const windowColors = [0x00fff9, 0xff00ff, 0xffff00, 0x00ff66, 0x0066ff];
     const windowRows = Math.floor(height / 8);
     const windowCols = Math.floor(width / 6);
     
     for (let row = 0; row < windowRows; row++) {
         for (let col = 0; col < windowCols; col++) {
-            if (Math.random() > 0.3) {
+            if (Math.random() > 0.25) { // More windows
                 const windowGeometry = new THREE.BoxGeometry(3, 4, 0.5);
-                const window = new THREE.Mesh(windowGeometry, windowMaterial.clone());
-                window.material.opacity = Math.random() * 0.5 + 0.2;
-                window.material.color.setHex([0xffffff, 0x00fff9, 0xff00ff, 0xffff00][Math.floor(Math.random() * 4)]);
-                window.position.set(
+                const windowColor = windowColors[Math.floor(Math.random() * windowColors.length)];
+                const windowMaterial = new THREE.MeshBasicMaterial({
+                    color: windowColor,
+                    transparent: true,
+                    opacity: Math.random() * 0.6 + 0.4
+                });
+                const windowMesh = new THREE.Mesh(windowGeometry, windowMaterial);
+                windowMesh.position.set(
                     -width/2 + 4 + col * 6,
                     5 + row * 8,
                     depth/2 + 0.3
                 );
-                group.add(window);
+                group.add(windowMesh);
+                
+                // Back windows too
+                const backWindow = windowMesh.clone();
+                backWindow.position.z = -depth/2 - 0.3;
+                group.add(backWindow);
+            }
+        }
+    }
+    
+    // Side windows
+    const sideWindowRows = Math.floor(height / 8);
+    const sideWindowCols = Math.floor(depth / 6);
+    for (let row = 0; row < sideWindowRows; row++) {
+        for (let col = 0; col < sideWindowCols; col++) {
+            if (Math.random() > 0.35) {
+                const windowGeometry = new THREE.BoxGeometry(0.5, 4, 3);
+                const windowColor = windowColors[Math.floor(Math.random() * windowColors.length)];
+                const windowMaterial = new THREE.MeshBasicMaterial({
+                    color: windowColor,
+                    transparent: true,
+                    opacity: Math.random() * 0.5 + 0.3
+                });
+                const windowMesh = new THREE.Mesh(windowGeometry, windowMaterial);
+                windowMesh.position.set(
+                    width/2 + 0.3,
+                    5 + row * 8,
+                    -depth/2 + 4 + col * 6
+                );
+                group.add(windowMesh);
+                
+                // Other side
+                const otherSide = windowMesh.clone();
+                otherSide.position.x = -width/2 - 0.3;
+                group.add(otherSide);
             }
         }
     }
@@ -2228,7 +2263,7 @@ function createFloatingPlatform() {
     const z = (Math.random() - 0.5) * CONFIG.world.size * 1.5;
     group.position.set(x, 0, z);
     
-    group.userData = { type: 'platform', floatOffset: Math.random() * Math.PI * 2, height };
+    group.userData = { type: 'platform', floatOffset: Math.random() * Math.PI * 2, height, size };
     
     return group;
 }
@@ -3259,9 +3294,73 @@ function updatePlayer(delta) {
         playerMech.userData.flyingHeight + verticalVelocity * delta
     ));
     
-    // 7. APPLY MOVEMENT
-    playerMech.position.x += moveDirection.x * currentSpeed * delta;
-    playerMech.position.z += moveDirection.z * currentSpeed * delta;
+    // 7. APPLY MOVEMENT WITH COLLISION DETECTION
+    const newX = playerMech.position.x + moveDirection.x * currentSpeed * delta;
+    const newZ = playerMech.position.z + moveDirection.z * currentSpeed * delta;
+    
+    // Check building collisions
+    let canMoveX = true;
+    let canMoveZ = true;
+    const playerRadius = 2; // Player collision radius
+    
+    buildings.forEach(building => {
+        if (!building.userData) return;
+        const bData = building.userData;
+        const bPos = building.position;
+        const halfW = (bData.width || 20) / 2 + playerRadius;
+        const halfD = (bData.depth || 20) / 2 + playerRadius;
+        const bHeight = bData.height || 50;
+        
+        // Only collide if player is below building height
+        if (playerMech.userData.flyingHeight < bHeight) {
+            // Check X collision
+            if (newX > bPos.x - halfW && newX < bPos.x + halfW &&
+                playerMech.position.z > bPos.z - halfD && playerMech.position.z < bPos.z + halfD) {
+                canMoveX = false;
+            }
+            // Check Z collision
+            if (playerMech.position.x > bPos.x - halfW && playerMech.position.x < bPos.x + halfW &&
+                newZ > bPos.z - halfD && newZ < bPos.z + halfD) {
+                canMoveZ = false;
+            }
+        }
+    });
+    
+    // Check platform collisions (land on top)
+    let onPlatform = false;
+    let platformHeight = 0;
+    scene.children.forEach(obj => {
+        if (obj.userData && obj.userData.type === 'platform') {
+            const pPos = obj.position;
+            const pHeight = obj.userData.height || 20;
+            const pSize = 10; // Platform size
+            
+            if (Math.abs(playerMech.position.x - pPos.x) < pSize &&
+                Math.abs(playerMech.position.z - pPos.z) < pSize) {
+                // Player is above platform
+                if (playerMech.userData.flyingHeight >= pHeight - 1 && 
+                    playerMech.userData.flyingHeight <= pHeight + 2) {
+                    onPlatform = true;
+                    platformHeight = pHeight;
+                }
+                // Player trying to go through platform from below
+                if (playerMech.userData.flyingHeight < pHeight && 
+                    playerMech.userData.flyingHeight > pHeight - 3) {
+                    platformHeight = pHeight;
+                }
+            }
+        }
+    });
+    
+    // Apply movement if no collision
+    if (canMoveX) playerMech.position.x = newX;
+    if (canMoveZ) playerMech.position.z = newZ;
+    
+    // Handle platform landing
+    if (onPlatform && !GameState.keys['Space']) {
+        playerMech.userData.flyingHeight = platformHeight;
+    }
+    
     playerMech.position.y = playerMech.userData.flyingHeight;
 
     // 8. MELEE (Q) - Deals damage
