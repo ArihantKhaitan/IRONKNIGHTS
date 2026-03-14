@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- LOADING SCREEN -->
     <div id="loading-screen">
         <div class="loader-content">
             <div class="mech-loader">
@@ -18,7 +19,7 @@
                 <div class="loader-ring"></div>
                 <div class="loader-core"></div>
             </div>
-            <h1 class="game-title">IRON KNIGHTS</h1>
+            <h1 class="game-title">IRON<span class="title-accent">KNIGHTS</span></h1>
             <p class="loading-text">INITIALIZING BATTLE SYNC<span class="dots">...</span></p>
             <div class="loading-bar">
                 <div class="loading-progress"></div>
@@ -26,6 +27,7 @@
         </div>
     </div>
 
+    <!-- MAIN MENU -->
     <div id="main-menu" class="hidden">
         <div class="menu-bg"></div>
         <div class="menu-content">
@@ -64,6 +66,7 @@
         </div>
     </div>
 
+    <!-- HANGAR/ARMORY SCREEN -->
     <div id="hangar-screen" class="hidden">
         <div class="hangar-bg"></div>
         <div class="hangar-content">
@@ -73,13 +76,12 @@
                 <span id="hangar-gold">0</span>
                 <span>GOLD</span>
             </div>
-            <div class="mech-selection" id="mech-selection">
-                <!-- Mechs will be populated by JavaScript -->
-            </div>
+            <div class="mech-selection" id="mech-selection"></div>
             <button class="deploy-btn" data-action="menu">BACK TO MENU</button>
         </div>
     </div>
 
+    <!-- CONTROLS SCREEN -->
     <div id="controls-screen" class="hidden">
         <div class="controls-bg"></div>
         <button class="back-btn" data-action="menu">← BACK</button>
@@ -112,7 +114,7 @@
                 </div>
                 <div class="control-item">
                     <div class="key">E</div>
-                    <span>SPECIAL ABILITY / INTERACT</span>
+                    <span>SPECIAL ABILITY</span>
                 </div>
                 <div class="control-item">
                     <div class="key">Q</div>
@@ -134,24 +136,20 @@
         </div>
     </div>
 
-    <!-- STORY MAP SCREEN - REFINED LAYOUT -->
+    <!-- STORY MAP SCREEN -->
     <div id="story-map-screen" class="hidden">
         <div class="story-map-bg"></div>
         
-        <!-- Main Layout Container -->
         <div class="map-layout">
             <!-- Left Side: Map Area -->
             <div class="map-area">
-                <!-- Header -->
                 <div class="map-header">
                     <h2 class="story-title">KINGDOM OF IRONSPIRE</h2>
                     <p class="story-subtitle">Select your mission</p>
                 </div>
                 
-                <!-- Map Container - Larger -->
                 <div class="map-container">
                     <svg class="kingdom-map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <!-- Definitions -->
                         <defs>
                             <filter id="glow">
                                 <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
@@ -161,101 +159,66 @@
                                 </feMerge>
                             </filter>
                             <linearGradient id="landGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#3a6a4a"/>
-                                <stop offset="50%" style="stop-color:#2a5a3a"/>
-                                <stop offset="100%" style="stop-color:#1a4a2a"/>
-                            </linearGradient>
-                            <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" style="stop-color:#6a7a8a"/>
-                                <stop offset="100%" style="stop-color:#4a5a6a"/>
+                                <stop offset="0%" style="stop-color:#2a4a3a"/>
+                                <stop offset="50%" style="stop-color:#1a3a2a"/>
+                                <stop offset="100%" style="stop-color:#0a2a1a"/>
                             </linearGradient>
                         </defs>
                         
                         <!-- Ocean Background -->
-                        <rect x="0" y="0" width="100" height="100" fill="#1a3a5a"/>
+                        <rect x="0" y="0" width="100" height="100" fill="#0a1a2a"/>
                         
                         <!-- Water waves -->
-                        <g class="water-waves" opacity="0.15">
-                            <ellipse cx="10" cy="20" rx="8" ry="3" fill="#2a5a8a"/>
-                            <ellipse cx="85" cy="15" rx="6" ry="2" fill="#2a5a8a"/>
-                            <ellipse cx="15" cy="85" rx="7" ry="2.5" fill="#2a5a8a"/>
-                            <ellipse cx="90" cy="75" rx="5" ry="2" fill="#2a5a8a"/>
-                            <ellipse cx="5" cy="50" rx="4" ry="1.5" fill="#2a5a8a"/>
+                        <g class="water-waves" opacity="0.1">
+                            <ellipse cx="10" cy="20" rx="8" ry="3" fill="#1a3a5a"/>
+                            <ellipse cx="85" cy="15" rx="6" ry="2" fill="#1a3a5a"/>
+                            <ellipse cx="15" cy="85" rx="7" ry="2.5" fill="#1a3a5a"/>
+                            <ellipse cx="90" cy="75" rx="5" ry="2" fill="#1a3a5a"/>
                         </g>
                         
-                        <!-- Main Island - Larger, covering most of the map -->
+                        <!-- Main Island -->
                         <path class="main-island" d="
-                            M 10 45
-                            Q 8 30, 20 18
-                            Q 35 5, 55 8
-                            Q 75 10, 85 25
-                            Q 95 40, 92 55
-                            Q 90 70, 80 82
-                            Q 65 95, 45 95
-                            Q 25 93, 15 80
-                            Q 5 65, 10 45
+                            M 10 50
+                            Q 8 30, 25 15
+                            Q 45 5, 65 10
+                            Q 85 18, 90 40
+                            Q 93 60, 85 78
+                            Q 70 93, 45 95
+                            Q 20 93, 10 75
+                            Q 5 60, 10 50
                             Z" 
                             fill="url(#landGradient)" 
-                            stroke="#2a4a3a" 
+                            stroke="#3a5a4a" 
                             stroke-width="0.5"
                             filter="url(#glow)"/>
                         
-                        <!-- Beaches/shores -->
-                        <ellipse cx="20" cy="88" rx="8" ry="3" fill="#8a7a5a" opacity="0.4"/>
-                        <ellipse cx="75" cy="85" rx="6" ry="2" fill="#8a7a5a" opacity="0.4"/>
-                        <ellipse cx="90" cy="50" rx="3" ry="6" fill="#8a7a5a" opacity="0.3"/>
-                        
-                        <!-- Mountains - Central area -->
+                        <!-- Mountains -->
                         <g class="mountains">
-                            <!-- Large mountain range in center-top -->
-                            <path d="M40 35 L48 15 L56 35 Z" fill="url(#mountainGrad)"/>
-                            <path d="M48 38 L55 20 L62 38 Z" fill="#5a6a7a"/>
-                            <path d="M55 40 L62 25 L69 40 Z" fill="url(#mountainGrad)"/>
-                            <!-- Snow caps -->
-                            <path d="M46 20 L48 15 L50 20 Z" fill="#ddd"/>
-                            <path d="M53 25 L55 20 L57 25 Z" fill="#ddd"/>
-                            <path d="M60 30 L62 25 L64 30 Z" fill="#ddd"/>
+                            <path d="M45 35 L52 18 L59 35 Z" fill="#4a5a6a"/>
+                            <path d="M52 38 L58 24 L64 38 Z" fill="#5a6a7a"/>
+                            <path d="M58 40 L64 28 L70 40 Z" fill="#4a5a6a"/>
+                            <path d="M50 22 L52 18 L54 22 Z" fill="#ccc"/>
+                            <path d="M56 28 L58 24 L60 28 Z" fill="#ccc"/>
                         </g>
                         
-                        <!-- Forests - Dark green patches -->
-                        <g class="forests">
-                            <ellipse cx="25" cy="75" rx="10" ry="6" fill="#1a3a1a" opacity="0.7"/>
-                            <ellipse cx="70" cy="65" rx="8" ry="5" fill="#1a3a1a" opacity="0.6"/>
-                            <ellipse cx="35" cy="55" rx="7" ry="4" fill="#1a3a1a" opacity="0.5"/>
-                            <ellipse cx="55" cy="70" rx="6" ry="4" fill="#1a3a1a" opacity="0.5"/>
-                            <ellipse cx="80" cy="45" rx="5" ry="3" fill="#1a3a1a" opacity="0.4"/>
+                        <!-- Forests -->
+                        <g class="forests" opacity="0.6">
+                            <ellipse cx="25" cy="72" rx="10" ry="6" fill="#0a2a0a"/>
+                            <ellipse cx="70" cy="60" rx="8" ry="5" fill="#0a2a0a"/>
+                            <ellipse cx="40" cy="55" rx="6" ry="4" fill="#0a2a0a"/>
                         </g>
-                        
-                        <!-- Small trees scattered -->
-                        <g class="trees" fill="#2a5a2a" opacity="0.6">
-                            <circle cx="20" cy="70" r="1.5"/>
-                            <circle cx="28" cy="78" r="1.2"/>
-                            <circle cx="32" cy="72" r="1"/>
-                            <circle cx="65" cy="60" r="1.3"/>
-                            <circle cx="72" cy="68" r="1"/>
-                            <circle cx="78" cy="55" r="1.2"/>
-                        </g>
-                        
-                        <!-- Rivers -->
-                        <path d="M50 30 Q45 45 50 60 Q55 75 45 88" 
-                              stroke="#3a7aaa" stroke-width="0.8" fill="none" opacity="0.5"/>
                         
                         <!-- Path Lines connecting locations -->
                         <g class="map-paths">
-                            <!-- HOME (18,85) to VILLAGE (32,65) -->
-                            <path d="M 18 85 L 32 65" class="map-path" data-path="1"/>
-                            <!-- VILLAGE (32,65) to FOREST (50,50) -->
-                            <path d="M 32 65 L 50 50" class="map-path" data-path="2"/>
-                            <!-- FOREST (50,50) to CASTLE_GATES (72,42) -->
-                            <path d="M 50 50 L 72 42" class="map-path" data-path="3"/>
-                            <!-- CASTLE_GATES (72,42) to CASTLE_KEEP (52,28) -->
-                            <path d="M 72 42 L 52 28" class="map-path" data-path="4"/>
-                            <!-- CASTLE_KEEP (52,28) to THRONE_ROOM (32,30) -->
-                            <path d="M 52 28 L 32 30" class="map-path" data-path="5"/>
+                            <path d="M 20 82 L 35 65" class="map-path" data-path="1"/>
+                            <path d="M 35 65 L 52 50" class="map-path" data-path="2"/>
+                            <path d="M 52 50 L 72 38" class="map-path" data-path="3"/>
+                            <path d="M 72 38 L 58 25" class="map-path" data-path="4"/>
+                            <path d="M 58 25 L 38 22" class="map-path" data-path="5"/>
                         </g>
                     </svg>
                     
-                    <!-- Compass - Outside SVG to avoid stretching -->
+                    <!-- Compass -->
                     <div class="map-compass">
                         <span class="compass-n">N</span>
                         <div class="compass-rose">
@@ -264,18 +227,20 @@
                         </div>
                     </div>
 
-                    <!-- Level Nodes - Repositioned to fit island -->
+                    <!-- Level Nodes -->
                     <div class="map-nodes">
-                        <div class="level-node home" data-level="HOME_BASE" style="left: 18%; top: 85%;">
+                        <!-- HOME BASE - Ironhold Stronghold -->
+                        <div class="level-node home" data-level="HOME_BASE" style="left: 20%; top: 82%;">
                             <div class="node-marker"><span>🏰</span></div>
                             <div class="node-info">
                                 <span class="node-name">Ironhold Stronghold</span>
-                                <span class="node-status">HOME</span>
+                                <span class="node-status">HOME BASE</span>
                             </div>
                         </div>
                         
-                        <div class="level-node" data-level="VILLAGE" style="left: 32%; top: 65%;">
-                            <div class="node-marker"><span>II</span></div>
+                        <!-- LEVEL 1 - Ravenshollow Village -->
+                        <div class="level-node" data-level="VILLAGE" style="left: 35%; top: 65%;">
+                            <div class="node-marker"><span>I</span></div>
                             <div class="node-info">
                                 <span class="node-name">Ravenshollow Village</span>
                                 <span class="node-status"></span>
@@ -283,8 +248,9 @@
                             <span class="lock-icon">🔒</span>
                         </div>
                         
-                        <div class="level-node" data-level="FOREST" style="left: 50%; top: 50%;">
-                            <div class="node-marker"><span>III</span></div>
+                        <!-- LEVEL 2 - Darkwood Forest -->
+                        <div class="level-node" data-level="FOREST" style="left: 52%; top: 50%;">
+                            <div class="node-marker"><span>II</span></div>
                             <div class="node-info">
                                 <span class="node-name">Darkwood Forest</span>
                                 <span class="node-status"></span>
@@ -292,8 +258,9 @@
                             <span class="lock-icon">🔒</span>
                         </div>
                         
-                        <div class="level-node" data-level="CASTLE_GATES" style="left: 72%; top: 42%;">
-                            <div class="node-marker"><span>IV</span></div>
+                        <!-- LEVEL 3 - Castle Gates -->
+                        <div class="level-node" data-level="CASTLE_GATES" style="left: 72%; top: 38%;">
+                            <div class="node-marker"><span>III</span></div>
                             <div class="node-info">
                                 <span class="node-name">Castle Gates</span>
                                 <span class="node-status"></span>
@@ -301,8 +268,9 @@
                             <span class="lock-icon">🔒</span>
                         </div>
                         
-                        <div class="level-node" data-level="CASTLE_KEEP" style="left: 52%; top: 28%;">
-                            <div class="node-marker"><span>V</span></div>
+                        <!-- LEVEL 4 - Castle Keep -->
+                        <div class="level-node" data-level="CASTLE_KEEP" style="left: 58%; top: 25%;">
+                            <div class="node-marker"><span>IV</span></div>
                             <div class="node-info">
                                 <span class="node-name">Castle Keep</span>
                                 <span class="node-status"></span>
@@ -310,8 +278,9 @@
                             <span class="lock-icon">🔒</span>
                         </div>
                         
-                        <div class="level-node" data-level="THRONE_ROOM" style="left: 32%; top: 30%;">
-                            <div class="node-marker"><span>VI</span></div>
+                        <!-- LEVEL 5 - Throne Room (Final) -->
+                        <div class="level-node" data-level="THRONE_ROOM" style="left: 38%; top: 22%;">
+                            <div class="node-marker"><span>V</span></div>
                             <div class="node-info">
                                 <span class="node-name">Throne Room</span>
                                 <span class="node-status"></span>
@@ -345,7 +314,7 @@
         </div>
     </div>
 
-    <!-- MISSION COMPLETE SCREEN - FIXED -->
+    <!-- MISSION COMPLETE SCREEN -->
     <div id="mission-complete-screen" class="hidden">
         <div class="mission-complete-bg"></div>
         <div class="mission-complete-content">
@@ -373,6 +342,7 @@
         </div>
     </div>
 
+    <!-- GAME CONTAINER -->
     <div id="game-container" class="hidden">
         <canvas id="game-canvas"></canvas>
         
@@ -459,6 +429,7 @@
             <div class="damage-indicator bottom"></div>
         </div>
 
+        <!-- Boss Health Bar -->
         <div id="boss-health-container" class="hidden">
             <span id="boss-name">BOSS NAME</span>
             <div class="boss-health-bar">
@@ -468,27 +439,21 @@
                 <span class="phase active"></span>
                 <span class="phase"></span>
                 <span class="phase"></span>
-                <span class="phase"></span>
             </div>
         </div>
 
+        <!-- Mission Objectives -->
         <div id="mission-objectives" class="hidden">
             <h4 id="mission-title">MISSION</h4>
             <ul id="objective-list"></ul>
         </div>
 
+        <!-- Interaction Prompt -->
         <div id="interaction-prompt" class="hidden">
             <span>Press E to Interact</span>
         </div>
 
-        <div id="dialogue-box" class="hidden">
-            <div class="dialogue-content">
-                <span id="dialogue-speaker"></span>
-                <p id="dialogue-text"></p>
-                <span class="dialogue-hint">Click to continue...</span>
-            </div>
-        </div>
-
+        <!-- Pause Menu -->
         <div id="pause-menu" class="hidden">
             <div class="pause-overlay"></div>
             <div class="pause-content">
@@ -499,6 +464,7 @@
             </div>
         </div>
 
+        <!-- Game Over -->
         <div id="game-over" class="hidden">
             <div class="game-over-overlay"></div>
             <div class="game-over-content">
