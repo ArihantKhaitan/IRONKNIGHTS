@@ -30,6 +30,10 @@ function setBoss(val) {
   currentBoss = val;
 }
 
+export function nullifyBoss() {
+  currentBoss = null;
+}
+
 function makeMechMat(color, emissiveInt = 0.4) {
   return new THREE.MeshStandardMaterial({
     color: new THREE.Color(color),

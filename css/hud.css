@@ -75,9 +75,11 @@
   text-transform: uppercase;
 }
 .bar-label { color: var(--text-dim); }
-.bar-value { color: var(--text-primary); font-size: 10px; }
+.bar-value,
+.bar-val { color: var(--text-primary); font-size: 10px; }
 
-.bar-bg {
+.bar-bg,
+.bar-track {
   height: 8px;
   background: rgba(255,255,255,0.06);
   border-radius: 1px;
@@ -85,7 +87,8 @@
   border: 1px solid rgba(255,255,255,0.04);
   position: relative;
 }
-.bar-bg::after {
+.bar-bg::after,
+.bar-track::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -131,14 +134,16 @@
   align-items: center;
   justify-content: center;
 }
-.crosshair-ring {
+.crosshair-ring,
+.ch-ring {
   position: absolute;
   width: 36px;
   height: 36px;
   border: 1px solid rgba(0,255,249,0.5);
   border-radius: 50%;
 }
-.crosshair-dot {
+.crosshair-dot,
+.ch-dot {
   width: 4px;
   height: 4px;
   background: var(--neon-cyan);
@@ -146,16 +151,23 @@
   box-shadow: 0 0 6px var(--neon-cyan);
   z-index: 1;
 }
-.crosshair-line {
+.crosshair-line,
+.ch-line {
   position: absolute;
   background: rgba(0,255,249,0.6);
 }
-.crosshair-line.h { width: 12px; height: 1px; }
-.crosshair-line.v { width: 1px; height: 12px; }
-.crosshair-line.l { right: calc(100% + 4px); }
-.crosshair-line.r { left: calc(100% + 4px); }
-.crosshair-line.u { bottom: calc(100% + 4px); }
-.crosshair-line.d { top: calc(100% + 4px); }
+.crosshair-line.h,
+.ch-line.h { width: 12px; height: 1px; }
+.crosshair-line.v,
+.ch-line.v { width: 1px; height: 12px; }
+.crosshair-line.l,
+.ch-line.l { right: calc(100% + 4px); }
+.crosshair-line.r,
+.ch-line.r { left: calc(100% + 4px); }
+.crosshair-line.u,
+.ch-line.u { bottom: calc(100% + 4px); }
+.crosshair-line.d,
+.ch-line.d { top: calc(100% + 4px); }
 
 .target-info {
   display: none;
@@ -193,7 +205,9 @@
   backdrop-filter: blur(4px);
   min-width: 140px;
 }
-.weapon-icon { font-size: 22px; }
+.weapon-icon,
+.weapon-icon-wrap { font-size: 22px; }
+.reload-ind { display: none; font-family: var(--font-display); font-size: 10px; color: var(--neon-gold); letter-spacing: 0.15em; animation: btn-glow-pulse 0.5s ease-in-out infinite; }
 .weapon-name {
   font-family: var(--font-display);
   font-size: 10px;
@@ -227,13 +241,15 @@
   display: inline-block;
 }
 
-.ability-display {
+.ability-display,
+.ability-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
 }
-.ability-icon-wrap {
+.ability-icon-wrap,
+.ability-icon-box {
   position: relative;
   width: 50px;
   height: 50px;
@@ -257,6 +273,9 @@
   align-items: center;
   justify-content: center;
 }
+/* Override hidden for ability-cooldown specifically - use .hidden class to hide it */
+#ability-cooldown.hidden { display: none !important; }
+.ability-cd-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.72); clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); display: flex; align-items: center; justify-content: center; }
 #ability-cooldown-text {
   font-family: var(--font-display);
   font-size: 13px;
@@ -271,13 +290,22 @@
   color: var(--text-dim);
   text-align: center;
 }
-.ability-key-hint {
+.ability-key-hint,
+.ability-key {
   font-family: var(--font-display);
   font-size: 8px;
   color: var(--text-muted);
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.08);
   padding: 1px 5px;
+}
+.ability-lbl {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  text-align: center;
 }
 
 /* ── Bottom bar ── */
@@ -302,7 +330,8 @@
   align-items: center;
   gap: 1px;
 }
-.hud-stat-label {
+.hud-stat-label,
+.hud-stat-lbl {
   font-family: var(--font-display);
   font-size: 8px;
   font-weight: 700;
@@ -310,7 +339,8 @@
   color: var(--text-muted);
   text-transform: uppercase;
 }
-.hud-stat-value {
+.hud-stat-value,
+.hud-stat-val {
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 700;
@@ -334,7 +364,8 @@
   z-index: 1;
   pointer-events: none;
 }
-.minimap-label {
+.minimap-label,
+.minimap-lbl {
   position: absolute;
   bottom: -18px;
   left: 50%;
@@ -393,7 +424,8 @@
   text-shadow: 0 0 12px var(--neon-red);
 }
 
-.boss-health-track {
+.boss-health-track,
+.boss-hp-track {
   width: 100%;
   height: 10px;
   background: rgba(255,0,68,0.1);
@@ -402,13 +434,15 @@
   overflow: hidden;
 }
 
-#boss-health-fill {
+#boss-health-fill,
+.boss-hp-fill {
   height: 100%;
   background: linear-gradient(90deg, #cc0033, #ff0044);
   box-shadow: 0 0 10px #ff0044;
   transition: width 0.2s ease;
   width: 100%;
 }
+.boss-name-lbl { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 0.2em; color: var(--neon-red); text-shadow: 0 0 12px var(--neon-red); }
 
 .boss-phase-pips {
   display: flex;
@@ -471,7 +505,8 @@
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
 }
 
-.objectives-title {
+.objectives-title,
+.obj-title {
   font-family: var(--font-display);
   font-size: 9px;
   font-weight: 700;
@@ -584,7 +619,8 @@
   text-shadow: var(--shadow-cyan);
 }
 
-.pause-buttons {
+.pause-buttons,
+.pause-btns {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -639,7 +675,8 @@
   pointer-events: all;
 }
 
-.game-over-title {
+.game-over-title,
+.go-title {
   font-family: var(--font-display);
   font-size: clamp(28px, 5vw, 52px);
   font-weight: 900;
@@ -649,7 +686,8 @@
   text-align: center;
 }
 
-.game-over-subtitle {
+.game-over-subtitle,
+.go-sub {
   font-family: var(--font-body);
   font-size: 14px;
   letter-spacing: 0.2em;
@@ -657,7 +695,8 @@
   text-transform: uppercase;
 }
 
-.game-over-stats {
+.game-over-stats,
+.go-stats {
   display: flex;
   gap: 24px;
   align-items: center;
@@ -672,21 +711,24 @@
   border: 1px solid rgba(255,0,68,0.15);
   clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
 }
-.go-stat-label {
+.go-stat-label,
+.go-stat-lbl {
   font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.15em;
   color: var(--text-muted);
   text-transform: uppercase;
 }
-.go-stat-value {
+.go-stat-value,
+.go-stat-val {
   font-family: var(--font-display);
   font-size: 24px;
   font-weight: 700;
   color: var(--neon-gold);
 }
 
-.game-over-buttons {
+.game-over-buttons,
+.go-btns {
   display: flex;
   gap: 12px;
 }

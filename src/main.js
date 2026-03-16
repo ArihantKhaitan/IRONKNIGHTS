@@ -6,7 +6,7 @@ import { initInput, requestPointerLock, releasePointerLock } from './input.js';
 import { initEngine, scene, camera, renderer, clock, setupLighting } from './engine.js';
 import { buildArena, clearWorld } from './world.js';
 import { createPlayer, updatePlayer, playerMesh, resetPlayer } from './player.js';
-import { clearEnemies, spawnEnemies, spawnBoss, updateEnemies, enemies, currentBoss } from './enemies.js';
+import { clearEnemies, spawnEnemies, spawnBoss, updateEnemies, enemies, currentBoss, nullifyBoss } from './enemies.js';
 import { clearProjectiles, updateProjectiles, firePlayerProjectile, tryMeleeAttack, handleGroundSlam } from './combat.js';
 import { updateEffects, clearEffects, cameraShake } from './effects.js';
 import { updateHUD, updateMinimap, initHUD } from './hud.js';
@@ -255,8 +255,8 @@ function setupEventListeners() {
 
   // Boss defeated
   document.addEventListener('bossDefeated', (e) => {
-    // Clear the currentBoss reference in enemies module
-    // (it's already been removed from scene in combat.js)
+    // Null out the currentBoss reference in enemies module
+    nullifyBoss();
     const mission = State.currentMission;
     if (mission) {
       mission.objectives.forEach(obj => {

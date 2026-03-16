@@ -235,7 +235,16 @@ a { text-decoration: none; }
   z-index: 1;
 }
 
-.loading-title {
+.loading-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.game-title {
   font-family: var(--font-display);
   font-size: clamp(28px, 5vw, 48px);
   font-weight: 900;
@@ -244,10 +253,15 @@ a { text-decoration: none; }
   animation: title-glow-pulse 3s ease-in-out infinite;
   text-align: center;
 }
-.loading-title span {
+.game-title span {
   color: var(--neon-cyan);
 }
 
+/* Legacy alias */
+.loading-title { font-family: var(--font-display); font-size: clamp(28px,5vw,48px); font-weight: 900; letter-spacing: 0.15em; color: var(--text-primary); animation: title-glow-pulse 3s ease-in-out infinite; text-align: center; }
+.loading-title span { color: var(--neon-cyan); }
+
+.loading-status,
 .loading-text {
   font-family: var(--font-body);
   font-size: 14px;
@@ -257,11 +271,8 @@ a { text-decoration: none; }
   text-transform: uppercase;
   min-height: 20px;
 }
-.loading-text::after {
-  content: '...';
-  animation: dots-blink 1.2s steps(4, end) infinite;
-}
 
+.loading-bar-wrap,
 .loading-bar-bg {
   width: 320px;
   height: 4px;
@@ -270,6 +281,7 @@ a { text-decoration: none; }
   overflow: hidden;
   position: relative;
 }
+.loading-bar-wrap::before,
 .loading-bar-bg::before {
   content: '';
   position: absolute;
@@ -277,6 +289,7 @@ a { text-decoration: none; }
   border: 1px solid rgba(0,255,249,0.2);
   border-radius: 2px;
 }
+.loading-bar-fill,
 #loading-progress-fill {
   height: 100%;
   width: 0%;

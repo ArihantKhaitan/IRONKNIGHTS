@@ -60,6 +60,13 @@
   gap: 48px;
 }
 
+.menu-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
 .menu-title {
   font-family: var(--font-display);
   font-size: clamp(36px, 6vw, 72px);
@@ -74,7 +81,8 @@
   color: var(--neon-cyan);
   display: block;
 }
-.menu-subtitle {
+.menu-subtitle,
+.menu-tagline {
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
@@ -411,7 +419,8 @@
   background-size: 60px 60px;
 }
 
-.controls-content {
+.controls-content,
+.controls-wrap {
   position: relative;
   z-index: 1;
   width: min(800px, 95vw);
@@ -438,7 +447,8 @@
   gap: 8px;
 }
 
-.control-row {
+.control-row,
+.ctrl-row {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -447,7 +457,8 @@
   border: 1px solid rgba(0,255,249,0.08);
   clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
 }
-.control-key {
+.control-key,
+.ctrl-key {
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
@@ -459,7 +470,8 @@
   text-align: center;
   white-space: nowrap;
 }
-.control-desc {
+.control-desc,
+.ctrl-desc {
   font-family: var(--font-body);
   font-size: 13px;
   color: var(--text-dim);
@@ -499,14 +511,16 @@
   overflow: hidden;
 }
 
-.story-map-bg {
+.story-map-bg,
+.story-bg {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(ellipse at 30% 50%, rgba(201,162,39,0.04) 0%, transparent 60%),
     radial-gradient(ellipse at 70% 30%, rgba(255,0,68,0.03) 0%, transparent 50%);
 }
-.story-map-bg::after {
+.story-map-bg::after,
+.story-bg::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -516,7 +530,17 @@
   background-size: 80px 80px;
 }
 
-.story-map-area {
+/* HTML uses .story-layout which is the same as the #story-map-screen flex container */
+.story-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.story-map-area,
+.map-area {
   flex: 1;
   position: relative;
   display: flex;
@@ -524,7 +548,8 @@
   overflow: hidden;
 }
 
-.story-map-header {
+.story-map-header,
+.map-header {
   position: relative;
   z-index: 1;
   display: flex;
@@ -533,7 +558,8 @@
   padding: 20px 30px;
   border-bottom: 1px solid rgba(201,162,39,0.15);
 }
-.story-map-title {
+.story-map-title,
+.map-title {
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
@@ -542,14 +568,16 @@
   text-shadow: 0 0 12px var(--neon-gold);
 }
 
-.kingdom-map-container {
+.kingdom-map-container,
+.map-container {
   flex: 1;
   position: relative;
   z-index: 1;
   overflow: hidden;
 }
 
-.kingdom-map-svg {
+.kingdom-map-svg,
+.kingdom-svg {
   width: 100%;
   height: 100%;
 }
@@ -606,7 +634,8 @@
   z-index: 1;
 }
 
-.mission-sidebar-title {
+.mission-sidebar-title,
+.sidebar-title {
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
@@ -617,7 +646,12 @@
   padding-bottom: 10px;
 }
 
-#selected-mission-title {
+/* Sidebar layout containers */
+.sidebar-top { display: flex; flex-direction: column; gap: 16px; flex: 1; }
+.sidebar-bottom { margin-top: auto; }
+
+#selected-mission-title,
+.sb-mission-title {
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
@@ -626,7 +660,8 @@
   min-height: 28px;
 }
 
-#selected-mission-desc {
+#selected-mission-desc,
+.sb-mission-desc {
   font-family: var(--font-body);
   font-size: 13px;
   color: var(--text-dim);
@@ -635,12 +670,21 @@
 }
 
 .reward-section { display: flex; flex-direction: column; gap: 6px; }
-.reward-label {
+.reward-label,
+.sb-reward-label {
   font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.15em;
   color: var(--text-muted);
   text-transform: uppercase;
+}
+.sb-reward {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
 }
 #mission-reward {
   display: flex;
@@ -653,7 +697,8 @@
 .reward-gold { color: var(--neon-gold); }
 .reward-unlock { color: var(--neon-cyan); }
 
-#start-mission-btn {
+#start-mission-btn,
+.start-btn {
   display: none;
   font-family: var(--font-display);
   font-size: 13px;
@@ -692,7 +737,8 @@
   gap: 32px;
 }
 
-.complete-title {
+.complete-title,
+.mc-title {
   font-family: var(--font-display);
   font-size: clamp(28px, 5vw, 52px);
   font-weight: 900;
@@ -702,20 +748,23 @@
   text-align: center;
 }
 
-.complete-stats {
+.complete-stats,
+.mc-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   width: min(600px, 90vw);
 }
-.stat-box {
+.stat-box,
+.mc-stat {
   background: var(--bg-panel);
   border: 1px solid rgba(0,255,68,0.2);
   padding: 16px;
   text-align: center;
   clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
 }
-.stat-box-label {
+.stat-box-label,
+.mc-stat-lbl {
   font-family: var(--font-display);
   font-size: 9px;
   letter-spacing: 0.15em;
@@ -723,14 +772,17 @@
   text-transform: uppercase;
   margin-bottom: 6px;
 }
-.stat-box-value {
+.stat-box-value,
+.mc-stat-val {
   font-family: var(--font-display);
   font-size: 22px;
   font-weight: 700;
   color: var(--neon-gold);
 }
+.mc-stat-val.gold { color: var(--neon-gold); }
 
-#complete-unlock {
+#complete-unlock,
+.mc-unlock {
   font-family: var(--font-display);
   font-size: 14px;
   font-weight: 700;
@@ -744,13 +796,15 @@
   display: none;
 }
 
-.complete-buttons {
+.complete-buttons,
+.mc-btns {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
 }
-.complete-btn {
+.complete-btn,
+.mc-btn {
   font-family: var(--font-display);
   font-size: 12px;
   font-weight: 700;
@@ -761,19 +815,23 @@
   transition: all var(--transition);
   text-transform: uppercase;
 }
-.complete-btn.primary {
+.complete-btn.primary,
+.mc-btn.primary {
   background: var(--neon-green, #00ff44);
   color: var(--bg-darkest);
   box-shadow: 0 0 20px rgba(0,255,68,0.4);
 }
-.complete-btn.primary:hover {
+.complete-btn.primary:hover,
+.mc-btn.primary:hover {
   box-shadow: 0 0 40px rgba(0,255,68,0.7);
 }
-.complete-btn.secondary {
+.complete-btn.secondary,
+.mc-btn.secondary {
   background: rgba(0,255,249,0.08);
   color: var(--neon-cyan);
   border: 1px solid rgba(0,255,249,0.3);
 }
-.complete-btn.secondary:hover {
+.complete-btn.secondary:hover,
+.mc-btn.secondary:hover {
   background: rgba(0,255,249,0.15);
 }
