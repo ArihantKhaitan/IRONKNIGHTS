@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IRON KNIGHTS — Medieval Mech Combat</title>
+  <title>IRON KNIGHTS: ASHFALL — A Broken Kingdom</title>
 
   <!-- Three.js import map -->
   <script type="importmap">
@@ -14,12 +14,11 @@
   }
   </script>
 
-  <!-- Google Fonts -->
+  <!-- Fonts: Cinzel (titles), Spectral (body), Rajdhani (HUD numerics) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Stylesheets -->
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/screens.css" />
   <link rel="stylesheet" href="css/hud.css" />
@@ -31,14 +30,10 @@
 ═══════════════════════════════════════════ -->
 <div id="loading-screen">
   <div class="loading-content">
-    <div class="mech-loader">
-      <div class="loader-ring outer"></div>
-      <div class="loader-ring mid"></div>
-      <div class="loader-ring inner"></div>
-      <div class="loader-core"></div>
-    </div>
+    <div class="loading-sigil">✠</div>
     <h1 class="game-title">IRON<span>KNIGHTS</span></h1>
-    <p class="loading-status" id="loading-text">INITIALIZING COMBAT SYSTEMS</p>
+    <div class="game-subtitle">— A S H F A L L —</div>
+    <p class="loading-status" id="loading-text">Stoking the furnace heart...</p>
     <div class="loading-bar-wrap">
       <div id="loading-progress-fill" class="loading-bar-fill"></div>
     </div>
@@ -50,200 +45,112 @@
 ═══════════════════════════════════════════ -->
 <div id="main-menu" style="display:none">
   <div class="menu-bg"></div>
+  <div class="menu-vignette"></div>
   <div class="menu-content">
     <div class="menu-logo">
+      <div class="menu-sigil">✠</div>
       <h1 class="menu-title">IRON<span>KNIGHTS</span></h1>
-      <p class="menu-tagline">DARK NEON MECH COMBAT · 1287 AD</p>
+      <p class="menu-tagline">ASHFALL &nbsp;·&nbsp; A KINGDOM OF ASH, RUST AND IRON GIANTS</p>
     </div>
     <nav class="menu-buttons">
-      <button class="menu-btn" data-action="story-mode">
-        <span class="btn-icon">⚔</span><span class="btn-text">STORY MODE</span>
-      </button>
       <button class="menu-btn" data-action="free-mode">
-        <span class="btn-icon">∞</span><span class="btn-text">FREE ROAM</span>
+        <span class="btn-icon">∞</span><span class="btn-text">RIDE OUT</span><span class="btn-hint">Free roam the broken marches</span>
       </button>
-      <button class="menu-btn" data-action="hangar">
-        <span class="btn-icon">◆</span><span class="btn-text">ROYAL ARMORY</span>
+      <button class="menu-btn" data-action="campaign">
+        <span class="btn-icon">⚔</span><span class="btn-text">CAMPAIGN</span><span class="btn-hint">Six chapters. One dead king.</span>
+      </button>
+      <button class="menu-btn" data-action="forge">
+        <span class="btn-icon">⚒</span><span class="btn-text">THE FORGE</span><span class="btn-hint">Engines &amp; upgrades</span>
       </button>
       <button class="menu-btn" data-action="controls">
-        <span class="btn-icon">⌨</span><span class="btn-text">CONTROLS</span>
+        <span class="btn-icon">⌨</span><span class="btn-text">CONTROLS</span><span class="btn-hint">Learn the reins</span>
       </button>
     </nav>
+    <div class="menu-footer">The kingdom died a generation ago. The vultures never left.</div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
-     3. HANGAR / ARMORY SCREEN
+     3. THE FORGE (mechs + upgrades)
 ═══════════════════════════════════════════ -->
-<div id="hangar-screen" style="display:none">
-  <div class="hangar-bg"></div>
-  <div class="hangar-header">
+<div id="forge-screen" style="display:none">
+  <div class="screen-bg"></div>
+  <div class="forge-header">
     <button class="back-btn" data-action="menu">← BACK</button>
-    <h2 class="hangar-title">⚙ ROYAL ARMORY</h2>
-    <div class="hangar-gold-display">
-      <span class="gold-sym">◆</span>
-      <span id="hangar-gold">0</span> GOLD
-    </div>
+    <h2 class="screen-title">⚒ THE FORGE</h2>
+    <div class="gold-display"><span class="gold-sym">◆</span><span id="forge-gold">0</span> GOLD</div>
   </div>
-  <div class="hangar-body">
+  <div class="forge-body">
     <div id="mech-selection"></div>
+    <h3 class="forge-sub">SMITHING &amp; UPGRADES</h3>
+    <div id="upgrade-tracks"></div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
-     4. CONTROLS SCREEN
+     4. CONTROLS
 ═══════════════════════════════════════════ -->
 <div id="controls-screen" style="display:none">
-  <div class="controls-bg"></div>
+  <div class="screen-bg"></div>
   <div class="controls-wrap">
     <button class="back-btn" data-action="menu">← BACK</button>
-    <h2 class="screen-title">COMBAT CONTROLS</h2>
+    <h2 class="screen-title">THE REINS</h2>
     <div class="controls-grid">
-      <div class="ctrl-row"><span class="ctrl-key">W A S D</span><span class="ctrl-desc">Move mech</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">MOUSE</span><span class="ctrl-desc">Aim / Look</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">LEFT CLICK</span><span class="ctrl-desc">Primary fire</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">RIGHT CLICK</span><span class="ctrl-desc">Secondary fire</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">SPACE</span><span class="ctrl-desc">Hover / Fly</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">SHIFT</span><span class="ctrl-desc">Sprint / Boost</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">E</span><span class="ctrl-desc">Special ability</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">Q</span><span class="ctrl-desc">Melee attack</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">R</span><span class="ctrl-desc">Reload weapon</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">ESC</span><span class="ctrl-desc">Pause game</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">CLICK</span><span class="ctrl-desc">Re-lock mouse</span></div>
-      <div class="ctrl-row"><span class="ctrl-key">TAB</span><span class="ctrl-desc">Lock-on target</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">W A S D</span><span class="ctrl-desc">Walk the engine</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">MOUSE</span><span class="ctrl-desc">Look / aim</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">LEFT CLICK</span><span class="ctrl-desc">Cannon fire</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">RIGHT CLICK</span><span class="ctrl-desc">Heavy shot (5 shells, splash)</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">Q</span><span class="ctrl-desc">Sword swing</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">E</span><span class="ctrl-desc">War art (ability)</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">SHIFT</span><span class="ctrl-desc">Boost (burns furnace)</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">SPACE</span><span class="ctrl-desc">Hover jets</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">R</span><span class="ctrl-desc">Reload shells</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">F</span><span class="ctrl-desc">Interact — shrines, bounty board</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">M</span><span class="ctrl-desc">Kingdom map</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">ESC</span><span class="ctrl-desc">Pause / close</span></div>
     </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
-     5. STORY MAP SCREEN
+     5. CAMPAIGN SCREEN
 ═══════════════════════════════════════════ -->
-<div id="story-map-screen" style="display:none">
-  <div class="story-bg"></div>
-  <div class="story-layout">
-
-    <!-- Map area -->
+<div id="campaign-screen" style="display:none">
+  <div class="screen-bg"></div>
+  <div class="campaign-layout">
     <div class="map-area">
       <div class="map-header">
-        <h2 class="map-title">⚔ KINGDOM OF IRONSPIRE</h2>
+        <h2 class="map-title">⚔ THE BROKEN MARCHES</h2>
         <button class="back-btn" data-action="menu">← BACK</button>
       </div>
-      <div class="map-container">
-        <svg class="kingdom-svg" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <radialGradient id="isleGrad" cx="50%" cy="50%" r="55%">
-              <stop offset="0%" stop-color="#1a3a2a"/>
-              <stop offset="100%" stop-color="#0a1a0a"/>
-            </radialGradient>
-            <filter id="nodeGlow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          </defs>
-
-          <!-- Ocean background -->
-          <rect width="900" height="560" fill="#040810"/>
-          <!-- Ocean shimmer -->
-          <ellipse cx="100" cy="100" rx="60" ry="20" fill="rgba(0,100,255,0.04)"/>
-          <ellipse cx="800" cy="80" rx="50" ry="15" fill="rgba(0,100,255,0.04)"/>
-          <ellipse cx="50" cy="450" rx="70" ry="18" fill="rgba(0,100,255,0.04)"/>
-          <ellipse cx="860" cy="420" rx="45" ry="14" fill="rgba(0,100,255,0.04)"/>
-
-          <!-- Main island shape -->
-          <path d="M80 280 Q75 180, 150 100 Q250 30, 400 25 Q570 18, 680 80 Q790 140, 820 280 Q840 400, 760 480 Q650 540, 450 545 Q230 548, 130 470 Q60 400, 80 280 Z"
-            fill="url(#isleGrad)" stroke="#2a4a3a" stroke-width="1"/>
-
-          <!-- Mountains in centre -->
-          <g opacity="0.6">
-            <polygon points="460,100 490,55 520,100" fill="#556677"/>
-            <polygon points="490,105 515,65 540,105" fill="#667788"/>
-            <polygon points="505,70 490,55 475,70" fill="#aabbcc"/>
-            <polygon points="518,72 515,65 512,72" fill="#aabbcc"/>
-          </g>
-
-          <!-- Forests -->
-          <ellipse cx="200" cy="380" rx="55" ry="30" fill="#0a2a0a" opacity="0.7"/>
-          <ellipse cx="680" cy="320" rx="45" ry="25" fill="#0a2a0a" opacity="0.7"/>
-
-          <!-- Path lines connecting nodes -->
-          <line class="map-path" data-from="VILLAGE" data-to="FOREST"    x1="220" y1="430" x2="360" y2="340" stroke-dasharray="8,4"/>
-          <line class="map-path" data-from="FOREST" data-to="CASTLE_GATES" x1="360" y1="340" x2="540" y2="255" stroke-dasharray="8,4"/>
-          <line class="map-path" data-from="CASTLE_GATES" data-to="CASTLE_KEEP" x1="540" y1="255" x2="620" y2="160" stroke-dasharray="8,4"/>
-          <line class="map-path" data-from="CASTLE_KEEP" data-to="THRONE_ROOM"  x1="620" y1="160" x2="450" y2="100" stroke-dasharray="8,4"/>
-
-          <!-- VILLAGE node -->
-          <g class="level-node unlocked" data-level="VILLAGE" transform="translate(220,430)" filter="url(#nodeGlow)" style="cursor:pointer">
-            <circle r="26" class="node-bg"/>
-            <text text-anchor="middle" dy="4" font-size="11" font-family="Orbitron,monospace" font-weight="700" class="node-num">I</text>
-            <text text-anchor="middle" dy="44" font-size="9" font-family="Orbitron,monospace" class="node-lbl">VILLAGE</text>
-          </g>
-
-          <!-- FOREST node -->
-          <g class="level-node locked" data-level="FOREST" transform="translate(360,340)" filter="url(#nodeGlow)" style="cursor:pointer">
-            <circle r="26" class="node-bg"/>
-            <text text-anchor="middle" dy="4" font-size="11" font-family="Orbitron,monospace" font-weight="700" class="node-num">II</text>
-            <text text-anchor="middle" dy="44" font-size="9" font-family="Orbitron,monospace" class="node-lbl">FOREST</text>
-          </g>
-
-          <!-- CASTLE GATES node -->
-          <g class="level-node locked" data-level="CASTLE_GATES" transform="translate(540,255)" filter="url(#nodeGlow)" style="cursor:pointer">
-            <rect x="-30" y="-26" width="60" height="52" rx="4" class="node-bg"/>
-            <text text-anchor="middle" dy="-4" font-size="10" font-family="Orbitron,monospace" font-weight="700" class="node-num">III</text>
-            <text text-anchor="middle" dy="8" font-size="7.5" font-family="Orbitron,monospace" class="node-lbl">GATES</text>
-            <text text-anchor="middle" dy="44" font-size="9" font-family="Orbitron,monospace" class="node-lbl">CASTLE GATES</text>
-          </g>
-
-          <!-- CASTLE KEEP node -->
-          <g class="level-node locked" data-level="CASTLE_KEEP" transform="translate(620,160)" filter="url(#nodeGlow)" style="cursor:pointer">
-            <rect x="-30" y="-26" width="60" height="52" rx="4" class="node-bg"/>
-            <text text-anchor="middle" dy="-4" font-size="10" font-family="Orbitron,monospace" font-weight="700" class="node-num">IV</text>
-            <text text-anchor="middle" dy="8" font-size="7.5" font-family="Orbitron,monospace" class="node-lbl">KEEP</text>
-            <text text-anchor="middle" dy="44" font-size="9" font-family="Orbitron,monospace" class="node-lbl">CASTLE KEEP</text>
-          </g>
-
-          <!-- THRONE ROOM node (diamond) -->
-          <g class="level-node locked" data-level="THRONE_ROOM" transform="translate(450,100)" filter="url(#nodeGlow)" style="cursor:pointer">
-            <polygon points="0,-30 30,0 0,30 -30,0" class="node-bg"/>
-            <text text-anchor="middle" dy="4" font-size="10" font-family="Orbitron,monospace" font-weight="700" class="node-num">V</text>
-            <text text-anchor="middle" dy="48" font-size="9" font-family="Orbitron,monospace" class="node-lbl">THRONE ROOM</text>
-          </g>
-
-          <!-- Decorative castle silhouette top-right -->
-          <g opacity="0.06" fill="#00fff9" transform="translate(680,60)">
-            <rect x="0" y="0" width="140" height="80"/>
-            <rect x="-10" y="-25" width="22" height="35"/>
-            <rect x="25" y="-30" width="22" height="40"/>
-            <rect x="95" y="-30" width="22" height="40"/>
-            <rect x="130" y="-20" width="20" height="30"/>
-          </g>
-        </svg>
-      </div><!-- .map-container -->
-    </div><!-- .map-area -->
-
-    <!-- Mission Sidebar -->
+      <div class="map-canvas-wrap">
+        <canvas id="campaign-map-canvas" width="820" height="600"></canvas>
+      </div>
+    </div>
     <div class="mission-sidebar">
-      <div class="sidebar-top">
-        <h3 class="sidebar-title">MISSION BRIEFING</h3>
-        <div id="selected-mission-title" class="sb-mission-title">SELECT A LOCATION</div>
-        <p id="selected-mission-desc" class="sb-mission-desc">Click an unlocked node on the map to view mission details.</p>
-        <div class="sb-reward-label">REWARDS</div>
-        <div id="mission-reward" class="sb-reward"></div>
+      <h3 class="sidebar-title">THE CAMPAIGN</h3>
+      <div id="mission-list"></div>
+      <div class="brief-panel">
+        <div id="brief-title" class="brief-title">SELECT A CHAPTER</div>
+        <p id="brief-desc" class="brief-desc">Choose an unlocked chapter of the campaign to read its briefing.</p>
+        <div id="brief-reward" class="brief-reward"></div>
+        <button id="deploy-mission-btn" class="start-btn" style="display:none" data-mission-id="">RIDE OUT ▶</button>
       </div>
-      <div class="sidebar-bottom">
-        <button id="start-mission-btn" class="start-btn" style="display:none" data-level="" data-mission-id="">DEPLOY ▶</button>
-      </div>
-    </div><!-- .mission-sidebar -->
-
-  </div><!-- .story-layout -->
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
-     6. GAME CONTAINER
+     6. GAME
 ═══════════════════════════════════════════ -->
 <div id="game-container" style="display:none">
-
-  <!-- 3D Canvas -->
   <canvas id="game-canvas"></canvas>
 
-  <!-- HUD overlay -->
   <div id="hud">
+    <!-- Compass ribbon -->
+    <div class="compass-wrap">
+      <canvas id="compass-canvas" width="460" height="44"></canvas>
+    </div>
 
     <!-- Gold top-right -->
     <div class="hud-gold">
@@ -251,160 +158,181 @@
       <span id="hud-gold-value">0</span>
     </div>
 
-    <!-- Left: Status bars -->
+    <!-- Left: status bars -->
     <div class="hud-left">
       <div class="bar-row">
-        <div class="bar-header">
-          <span class="bar-label">HULL</span>
-          <span class="bar-val" id="health-text">300/300</span>
-        </div>
-        <div class="bar-track">
-          <div class="bar-fill health" id="health-bar-fill" style="width:100%"></div>
-        </div>
+        <div class="bar-header"><span class="bar-label">HULL</span><span class="bar-val" id="health-text">320 / 320</span></div>
+        <div class="bar-track"><div class="bar-fill health" id="health-bar-fill" style="width:100%"></div></div>
       </div>
       <div class="bar-row">
-        <div class="bar-header">
-          <span class="bar-label">SHIELD</span>
-          <span class="bar-val" id="shield-text">150/150</span>
-        </div>
-        <div class="bar-track">
-          <div class="bar-fill shield" id="shield-bar-fill" style="width:100%"></div>
-        </div>
+        <div class="bar-header"><span class="bar-label">WARD</span><span class="bar-val" id="shield-text">140 / 140</span></div>
+        <div class="bar-track"><div class="bar-fill shield" id="shield-bar-fill" style="width:100%"></div></div>
       </div>
       <div class="bar-row">
-        <div class="bar-header">
-          <span class="bar-label">BOOST</span>
-        </div>
-        <div class="bar-track">
-          <div class="bar-fill boost" id="boost-bar-fill" style="width:100%"></div>
-        </div>
+        <div class="bar-header"><span class="bar-label">FURNACE</span></div>
+        <div class="bar-track"><div class="bar-fill boost" id="boost-bar-fill" style="width:100%"></div></div>
       </div>
     </div>
 
-    <!-- Center: Crosshair -->
+    <!-- Crosshair -->
     <div class="hud-center">
       <div class="crosshair">
         <div class="ch-ring"></div>
-        <div class="ch-line h l"></div>
-        <div class="ch-line h r"></div>
-        <div class="ch-line v u"></div>
-        <div class="ch-line v d"></div>
+        <div class="ch-line h l"></div><div class="ch-line h r"></div>
+        <div class="ch-line v u"></div><div class="ch-line v d"></div>
         <div class="ch-dot"></div>
       </div>
     </div>
 
-    <!-- Right: Weapon + Ability -->
+    <!-- Right: weapon + ability -->
     <div class="hud-right">
       <div class="weapon-display">
-        <div class="weapon-icon-wrap">🔫</div>
         <div class="weapon-info">
-          <div class="weapon-name" id="weapon-name">PLASMA CANNON</div>
+          <div class="weapon-name" id="weapon-name">ARM CANNON</div>
           <div class="weapon-ammo">
-            <span id="ammo-current">60</span>
-            <span class="ammo-sep">/</span>
-            <span id="ammo-max">60</span>
+            <span id="ammo-current">60</span><span class="ammo-sep">/</span><span id="ammo-max">60</span>
           </div>
           <div id="reload-indicator" style="display:none" class="reload-ind">↺ RELOADING</div>
         </div>
       </div>
       <div class="ability-wrap">
         <div class="ability-icon-box">
-          <div id="ability-icon-inner" class="ability-icon-inner">⚡</div>
-          <div id="ability-cooldown" class="ability-cd-overlay hidden">
-            <span id="ability-cooldown-text">5</span>
-          </div>
+          <div id="ability-icon-inner" class="ability-icon-inner">⇻</div>
+          <div id="ability-cooldown" class="ability-cd-overlay hidden"><span id="ability-cooldown-text">5</span></div>
         </div>
-        <div id="ability-name" class="ability-lbl">BLINK</div>
+        <div id="ability-name" class="ability-lbl">LUNGE</div>
         <div class="ability-key">[E]</div>
       </div>
     </div>
 
     <!-- Bottom stats -->
     <div class="hud-bottom">
-      <div class="hud-stat">
-        <span class="hud-stat-lbl">SCORE</span>
-        <span class="hud-stat-val" id="score-value">0</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-stat-lbl">KILLS</span>
-        <span class="hud-stat-val" id="kills-value">0</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-stat-lbl">WAVE</span>
-        <span class="hud-stat-val" id="wave-value">1</span>
-      </div>
+      <div class="hud-stat"><span class="hud-stat-lbl">SCORE</span><span class="hud-stat-val" id="score-value">0</span></div>
+      <div class="hud-stat"><span class="hud-stat-lbl">KILLS</span><span class="hud-stat-val" id="kills-value">0</span></div>
+      <div class="hud-stat"><span class="hud-stat-lbl">REGION</span><span class="hud-stat-val region" id="region-value">EMBERFALL</span></div>
     </div>
 
-    <!-- Minimap -->
+    <!-- Radar -->
     <div class="minimap">
-      <canvas id="minimap-canvas" width="120" height="120"></canvas>
-      <div class="minimap-lbl">RADAR</div>
+      <canvas id="minimap-canvas" width="130" height="130"></canvas>
+      <div class="minimap-lbl">RADAR &nbsp;·&nbsp; [M] MAP</div>
     </div>
 
-    <!-- Damage indicators -->
+    <!-- Damage vignettes -->
     <div class="damage-indicator top"></div>
     <div class="damage-indicator bottom"></div>
     <div class="damage-indicator left"></div>
     <div class="damage-indicator right"></div>
 
-    <!-- Boss health bar -->
+    <!-- Boss bar -->
     <div id="boss-health-container" class="hidden">
       <div id="boss-name" class="boss-name-lbl">BOSS</div>
-      <div class="boss-hp-track">
-        <div id="boss-health-fill" class="boss-hp-fill"></div>
-      </div>
+      <div class="boss-hp-track"><div id="boss-health-fill" class="boss-hp-fill"></div></div>
       <div class="boss-phase-pips">
-        <div class="phase-pip active"></div>
-        <div class="phase-pip"></div>
-        <div class="phase-pip"></div>
+        <div class="phase-pip active"></div><div class="phase-pip"></div><div class="phase-pip"></div><div class="phase-pip"></div>
       </div>
     </div>
 
-    <!-- Mission objectives -->
+    <!-- Objectives -->
     <div id="mission-objectives" class="hidden">
-      <div class="obj-title">OBJECTIVES</div>
+      <div class="obj-title" id="objective-panel-title">OBJECTIVES</div>
       <ul id="objective-list"></ul>
     </div>
 
     <!-- Interaction prompt -->
     <div id="interaction-prompt" class="hidden">PRESS [F] TO INTERACT</div>
 
+    <!-- Objective world marker -->
+    <div id="objective-marker" class="hidden">
+      <div class="om-diamond"></div>
+      <div class="om-label">TARGET</div>
+      <div class="om-dist">0m</div>
+    </div>
+
+    <!-- Location title reveal -->
+    <div id="location-title">
+      <div class="loc-name">EMBERFALL VILLAGE</div>
+      <div class="loc-rule"></div>
+      <div class="loc-sub">What is left of it</div>
+    </div>
+
+    <!-- Toasts -->
+    <div id="toast-container"></div>
   </div><!-- /#hud -->
 
-  <!-- Kill feed (injected by hud.js) -->
+  <!-- Mission cinematic -->
+  <div id="cinematic" class="hidden">
+    <div class="cin-bar top"></div>
+    <div class="cin-content">
+      <div class="cin-chapter">CHAPTER I</div>
+      <div class="cin-title">ASH AND IRON</div>
+      <div class="cin-lines"></div>
+      <div class="cin-skip">click to ride</div>
+    </div>
+    <div class="cin-bar bottom"></div>
+  </div>
 
-  <!-- PAUSE MENU -->
+  <!-- PAUSE -->
   <div id="pause-menu" class="hidden">
-    <div class="pause-title">— PAUSED —</div>
+    <div class="pause-title">— REINED IN —</div>
     <div class="pause-btns">
       <button class="pause-btn" data-action="resume">▶ RESUME</button>
-      <button class="pause-btn" data-action="restart">↺ RESTART</button>
+      <button class="pause-btn" id="pause-restart-btn" data-action="restart">↺ RETRY CHAPTER</button>
+      <button class="pause-btn" id="sound-toggle-btn" data-action="sound-toggle">♪ SOUND: ON</button>
       <button class="pause-btn danger" data-action="menu">⌂ MAIN MENU</button>
     </div>
   </div>
 
-  <!-- GAME OVER SCREEN -->
+  <!-- GAME OVER (story missions) -->
   <div id="game-over-screen" class="hidden">
-    <div class="go-title">MECH DESTROYED</div>
-    <div class="go-sub">Your iron shell has fallen</div>
+    <div class="go-title">THE ENGINE HAS FALLEN</div>
+    <div class="go-sub">The ash takes another rider</div>
     <div class="go-stats">
       <div class="go-stat"><span class="go-stat-lbl">SCORE</span><span class="go-stat-val" id="final-score">0</span></div>
       <div class="go-stat"><span class="go-stat-lbl">KILLS</span><span class="go-stat-val" id="final-kills">0</span></div>
-      <div class="go-stat"><span class="go-stat-lbl">WAVE</span><span class="go-stat-val" id="final-wave">1</span></div>
     </div>
     <div class="go-btns">
-      <button class="go-btn primary" data-action="deploy-again">↺ DEPLOY AGAIN</button>
+      <button class="go-btn primary" data-action="deploy-again">↺ RIDE AGAIN</button>
       <button class="go-btn secondary" data-action="menu">⌂ MAIN MENU</button>
+    </div>
+  </div>
+
+  <!-- BOUNTY BOARD -->
+  <div id="bounty-overlay" class="hidden">
+    <div class="bounty-panel">
+      <div class="bounty-head">
+        <h2>⚖ THE BOUNTY BOARD</h2>
+        <button class="back-btn" data-action="close-bounty">✕ CLOSE</button>
+      </div>
+      <div id="bounty-posters"></div>
+    </div>
+  </div>
+
+  <!-- KINGDOM MAP OVERLAY -->
+  <div id="map-overlay" class="hidden">
+    <div class="map-overlay-panel">
+      <div class="map-overlay-head">
+        <h2>THE BROKEN MARCHES</h2>
+        <button class="back-btn" data-action="close-map">✕ CLOSE [M]</button>
+      </div>
+      <canvas id="world-map-canvas" width="760" height="620"></canvas>
+      <div class="map-legend">
+        <span><i class="lg lg-player"></i> You</span>
+        <span><i class="lg lg-camp"></i> Camp</span>
+        <span><i class="lg lg-shrine"></i> Wayshrine</span>
+        <span><i class="lg lg-obj"></i> Objective</span>
+      </div>
     </div>
   </div>
 
 </div><!-- /#game-container -->
 
 <!-- ═══════════════════════════════════════════
-     7. MISSION COMPLETE SCREEN (fixed overlay)
+     7. MISSION COMPLETE
 ═══════════════════════════════════════════ -->
 <div id="mission-complete-screen" style="display:none">
-  <div class="mc-title">MISSION COMPLETE</div>
+  <div class="mc-sigil">✠</div>
+  <div class="mc-title">CHAPTER COMPLETE</div>
   <div class="mc-stats">
     <div class="mc-stat"><div class="mc-stat-lbl">GOLD EARNED</div><div class="mc-stat-val gold" id="complete-gold">+0</div></div>
     <div class="mc-stat"><div class="mc-stat-lbl">KILLS</div><div class="mc-stat-val" id="complete-kills">0</div></div>
@@ -413,13 +341,11 @@
   <div id="complete-unlock" class="mc-unlock" style="display:none"></div>
   <div class="mc-btns">
     <button class="mc-btn primary" data-action="next-mission">CONTINUE ▶</button>
-    <button class="mc-btn secondary" data-action="complete-armory">ARMORY</button>
+    <button class="mc-btn secondary" data-action="complete-forge">THE FORGE</button>
     <button class="mc-btn secondary" data-action="menu">MAIN MENU</button>
   </div>
 </div>
 
-<!-- ES Module entry point -->
 <script type="module" src="src/main.js"></script>
-
 </body>
 </html>

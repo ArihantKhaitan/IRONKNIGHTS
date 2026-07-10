@@ -1,254 +1,450 @@
-// src/ui.js - UI screens and menus
+// src/ui.js - Screens: menu, campaign map, forge, bounty board, world map, pause
+import { CONFIG, missionById } from './config.js';
 import { State } from './state.js';
-import { CONFIG } from './config.js';
+import { getAvailableBounties, acceptBounty } from './quests.js';
+import { getPlayerPosition } from './player.js';
+import { getObjectiveTarget } from './quests.js';
+import { Audio } from './audio.js';
 
 const ALL_SCREENS = [
-  'loading-screen',
-  'main-menu',
-  'hangar-screen',
-  'controls-screen',
-  'story-map-screen',
-  'game-container',
-  'mission-complete-screen'
+  'loading-screen', 'main-menu', 'forge-screen', 'controls-screen',
+  'campaign-screen', 'game-container', 'mission-complete-screen'
 ];
 
 export function showScreen(id) {
-  ALL_SCREENS.forEach(screenId => {
-    const el = document.getElementById(screenId);
-    if (el) {
-      if (screenId === id) {
-        el.classList.remove('hidden');
-        el.style.display = '';
-      } else {
-        el.classList.add('hidden');
-        el.style.display = 'none';
-      }
+  ALL_SCREENS.forEach(sid => {
+    const el = document.getElementById(sid);
+    if (!el) return;
+    if (sid === id) {
+      el.classList.remove('hidden');
+      el.style.display = '';
+    } else {
+      el.classList.add('hidden');
+      el.style.display = 'none';
     }
   });
   State.screen = id;
 }
 
-export function updateHangarUI() {
-  const goldEl = document.getElementById('hangar-gold');
-  if (goldEl) goldEl.textContent = State.gold;
+// ────────────────────────────────────────────
+// WORLD MAP RENDERER (campaign screen + M overlay)
+// ────────────────────────────────────────────
+export function renderWorldMap(canvas, opts = {}) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+
+  const toMap = (x, z) => [
+    w / 2 + (x / 760) * (w / 2),
+    h / 2 + (z / 760) * (h / 2)
+  ];
+
+  // Parchment
+  const grad = ctx.createRadialGradient(w / 2, h / 2, 60, w / 2, h / 2, w * 0.7);
+  grad.addColorStop(0, '#2a221a');
+  grad.addColorStop(1, '#17120d');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  // Playable land
+  const [lcx, lcy] = toMap(0, 0);
+  ctx.beginPath();
+  ctx.arc(lcx, lcy, (700 / 760) * (w / 2), 0, Math.PI * 2);
+  ctx.fillStyle = '#241d15';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(216,201,163,0.25)';
+  ctx.setLineDash([6, 5]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Regions
+  for (const r of Object.values(CONFIG.REGIONS)) {
+    const [rx, ry] = toMap(r.center.x, r.center.z);
+    const rr = (r.radius / 760) * (w / 2);
+    ctx.beginPath();
+    ctx.arc(rx, ry, rr, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(216,201,163,0.045)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(216,201,163,0.14)';
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(232,221,196,0.75)';
+    ctx.font = `700 ${Math.max(10, w * 0.016)}px Cinzel, serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(r.name.toUpperCase(), rx, ry - rr - 6);
+  }
+
+  // Roads
+  ctx.strokeStyle = 'rgba(216,201,163,0.35)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 4]);
+  const roads = [
+    [[0, 440], [0, 60], [40, -330], [55, -420]],
+    [[0, 60], [-240, 10], [-400, -60]],
+    [[0, 60], [240, 70], [400, 70]]
+  ];
+  for (const road of roads) {
+    ctx.beginPath();
+    road.forEach(([x, z], i) => {
+      const [mx, my] = toMap(x, z);
+      if (i === 0) ctx.moveTo(mx, my);
+      else ctx.lineTo(mx, my);
+    });
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Camps
+  for (const c of CONFIG.CAMPS) {
+    const [mx, my] = toMap(c.x, c.z);
+    ctx.fillStyle = State.clearedCamps.includes(c.id) ? 'rgba(140,150,120,0.5)' : '#b3402a';
+    ctx.font = `${Math.max(9, w * 0.015)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('▲', mx, my + 3);
+  }
+
+  // Shrines
+  for (const s of CONFIG.SHRINES) {
+    const [mx, my] = toMap(s.x, s.z);
+    ctx.fillStyle = State.discoveredShrines.includes(s.id) ? '#c9a227' : 'rgba(216,201,163,0.35)';
+    ctx.fillText('◆', mx, my + 3);
+  }
+
+  // Mission node highlight
+  if (opts.mission) {
+    const region = CONFIG.REGIONS[opts.mission.region];
+    if (region) {
+      const [mx, my] = toMap(opts.mission.spawn.x, opts.mission.spawn.z);
+      ctx.strokeStyle = '#ff8a3d';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(mx, my, 12, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = '#ff8a3d';
+      ctx.font = `700 ${Math.max(11, w * 0.018)}px Cinzel, serif`;
+      ctx.fillText(opts.mission.num, mx, my + 4);
+    }
+  }
+
+  // Objective
+  const target = getObjectiveTarget && getObjectiveTarget();
+  if (opts.live && target) {
+    const [mx, my] = toMap(target.x, target.z);
+    ctx.fillStyle = '#ffb35c';
+    ctx.save();
+    ctx.translate(mx, my);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-4, -4, 8, 8);
+    ctx.restore();
+  }
+
+  // Player
+  const pp = getPlayerPosition && getPlayerPosition();
+  if (opts.live && pp) {
+    const [mx, my] = toMap(pp.x, pp.z);
+    ctx.fillStyle = '#e8ddc4';
+    ctx.beginPath();
+    ctx.arc(mx, my, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(232,221,196,0.5)';
+    ctx.beginPath();
+    ctx.arc(mx, my, 8, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+// ────────────────────────────────────────────
+// CAMPAIGN SCREEN
+// ────────────────────────────────────────────
+let selectedMissionId = null;
+
+export function updateCampaignUI() {
+  const list = document.getElementById('mission-list');
+  if (!list) return;
+  list.innerHTML = '';
+
+  CONFIG.MISSIONS.forEach(m => {
+    const unlocked = State.isMissionUnlocked(m.id);
+    const done = State.isMissionComplete(m.id);
+    const item = document.createElement('div');
+    item.className = 'mission-item' + (done ? ' done' : unlocked ? ' unlocked' : ' locked') + (selectedMissionId === m.id ? ' selected' : '');
+    item.innerHTML = `
+      <div class="mi-num">${m.num}</div>
+      <div class="mi-body">
+        <div class="mi-title">${m.title}</div>
+        <div class="mi-region">${CONFIG.REGIONS[m.region] ? CONFIG.REGIONS[m.region].name : ''}</div>
+      </div>
+      <div class="mi-status">${done ? '✓' : unlocked ? '' : '🔒'}</div>
+    `;
+    if (unlocked) {
+      item.addEventListener('click', () => {
+        Audio.play('ui');
+        selectedMissionId = m.id;
+        updateCampaignUI();
+      });
+    }
+    list.appendChild(item);
+  });
+
+  // Briefing panel
+  const briefTitle = document.getElementById('brief-title');
+  const briefDesc = document.getElementById('brief-desc');
+  const briefReward = document.getElementById('brief-reward');
+  const deployBtn = document.getElementById('deploy-mission-btn');
+
+  const m = selectedMissionId ? missionById(selectedMissionId) : null;
+  if (m && State.isMissionUnlocked(m.id)) {
+    if (briefTitle) briefTitle.textContent = `${m.num}. ${m.title}`;
+    if (briefDesc) briefDesc.textContent = m.brief;
+    if (briefReward) {
+      briefReward.innerHTML = `<span class="rw-gold">◆ ${m.reward.gold} gold</span>` +
+        (m.reward.unlocks ? `<span class="rw-unlock">Unlocks: ${CONFIG.MECHS[m.reward.unlocks].name}</span>` : '');
+    }
+    if (deployBtn) {
+      deployBtn.style.display = 'block';
+      deployBtn.dataset.missionId = m.id;
+      deployBtn.textContent = State.isMissionComplete(m.id) ? 'RIDE AGAIN ▶' : 'RIDE OUT ▶';
+    }
+  } else {
+    if (briefTitle) briefTitle.textContent = 'SELECT A CHAPTER';
+    if (briefDesc) briefDesc.textContent = 'Choose an unlocked chapter of the campaign to read its briefing.';
+    if (briefReward) briefReward.innerHTML = '';
+    if (deployBtn) deployBtn.style.display = 'none';
+  }
+
+  const mapCanvas = document.getElementById('campaign-map-canvas');
+  if (mapCanvas) renderWorldMap(mapCanvas, { mission: m && State.isMissionUnlocked(m.id) ? m : null });
+}
+
+// ────────────────────────────────────────────
+// FORGE (mechs + upgrades)
+// ────────────────────────────────────────────
+export function updateForgeUI() {
+  const goldEl = document.getElementById('forge-gold');
+  if (goldEl) goldEl.textContent = State.gold.toLocaleString();
 
   const selection = document.getElementById('mech-selection');
-  if (!selection) return;
-  selection.innerHTML = '';
+  if (selection) {
+    selection.innerHTML = '';
+    Object.values(CONFIG.MECHS).forEach(mech => {
+      const isUnlocked = State.isMechUnlocked(mech.id);
+      const isSelected = State.selectedMech === mech.id;
+      const canAfford = State.gold >= mech.price;
 
-  Object.values(CONFIG.MECHS).forEach(mech => {
-    const isUnlocked = State.isMechUnlocked(mech.id);
-    const isSelected = State.selectedMech === mech.id;
-    const canAfford = State.gold >= mech.price;
+      const card = document.createElement('div');
+      card.className = `mech-card${isSelected ? ' selected' : ''}${!isUnlocked ? ' locked' : ''}`;
+      card.style.setProperty('--mech-color', mech.color);
 
-    const card = document.createElement('div');
-    card.className = `mech-card${isSelected ? ' selected' : ''}${!isUnlocked ? ' locked' : ''}`;
-    card.dataset.mechId = mech.id;
+      const speedPct = Math.round((mech.speed / 22) * 100);
+      const armorPct = Math.round((mech.health / 850) * 100);
+      const powerPct = Math.round((mech.damage / 50) * 100);
 
-    // 3D tilt handler
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const mx = (e.clientX - rect.left) / rect.width - 0.5;
-      const my = (e.clientY - rect.top) / rect.height - 0.5;
-      card.style.transform = `perspective(600px) rotateY(${mx * 18}deg) rotateX(${-my * 18}deg) scale(1.03)`;
-    });
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = isSelected ? 'scale(1.03)' : '';
-    });
-
-    // Stat values
-    const speedPct = Math.round((mech.speed / 20) * 100);
-    const armorPct = Math.round((mech.health / 800) * 100);
-    const powerPct = Math.round((mech.damage / 45) * 100);
-
-    card.innerHTML = `
-      <div class="mech-preview ${mech.id}" style="--mech-color: ${mech.color}; --mech-accent: ${mech.accentColor};">
-        <div class="mech-silhouette"></div>
-        <div class="mech-glow-ring"></div>
-      </div>
-      <div class="mech-info">
-        <div class="mech-name" style="color: ${mech.color}; text-shadow: 0 0 10px ${mech.color}">${mech.name}</div>
+      card.innerHTML = `
+        <div class="mech-name">${mech.name}</div>
+        <div class="mech-title">${mech.title}</div>
         <div class="mech-desc">${mech.desc}</div>
         <div class="mech-stats">
-          <div class="stat-row">
-            <span class="stat-label">SPEED</span>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${speedPct}%; background:${mech.color}; box-shadow: 0 0 8px ${mech.color}"></div></div>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">ARMOR</span>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${armorPct}%; background:${mech.accentColor}; box-shadow: 0 0 8px ${mech.accentColor}"></div></div>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">POWER</span>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${powerPct}%; background:#ff0044; box-shadow: 0 0 8px #ff0044"></div></div>
-          </div>
+          <div class="stat-row"><span class="stat-label">SPEED</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${speedPct}%"></div></div></div>
+          <div class="stat-row"><span class="stat-label">HULL</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${armorPct}%"></div></div></div>
+          <div class="stat-row"><span class="stat-label">POWER</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${powerPct}%"></div></div></div>
         </div>
-        <div class="mech-ability">
-          <span class="ability-label">ABILITY:</span>
-          <span class="ability-name" style="color:${mech.color}">${mech.abilityName}</span>
-          <span class="ability-cd">${mech.abilityCooldown}s CD</span>
-        </div>
+        <div class="mech-ability"><span class="ability-label">ART:</span> <span class="ability-title">${mech.abilityName}</span> — ${mech.abilityDesc}</div>
         <div class="mech-footer">
-          ${isSelected
-            ? `<div class="mech-badge equipped">EQUIPPED</div>`
-            : isUnlocked
-              ? `<div class="mech-badge unlocked">SELECT</div>`
-              : canAfford
-                ? `<div class="mech-badge buyable"><span class="gold-icon">◆</span>${mech.price} GOLD</div>`
-                : `<div class="mech-badge locked-badge"><span class="lock-icon">🔒</span>${mech.price} GOLD</div>`
-          }
+          ${isSelected ? '<div class="mech-badge equipped">MOUNTED</div>'
+            : isUnlocked ? '<div class="mech-badge unlocked">MOUNT</div>'
+            : canAfford ? `<div class="mech-badge buyable">◆ ${mech.price} — FORGE IT</div>`
+            : `<div class="mech-badge locked-badge">◆ ${mech.price}</div>`}
         </div>
-      </div>
+      `;
+
+      card.addEventListener('click', () => {
+        if (isUnlocked) {
+          State.selectedMech = mech.id;
+          State.save();
+          Audio.play('ui');
+          updateForgeUI();
+        } else if (canAfford && mech.price > 0) {
+          State.spendGold(mech.price);
+          State.unlockMech(mech.id);
+          State.selectedMech = mech.id;
+          State.save();
+          Audio.play('missionComplete');
+          updateForgeUI();
+        } else {
+          card.classList.add('shake');
+          setTimeout(() => card.classList.remove('shake'), 400);
+        }
+      });
+      selection.appendChild(card);
+    });
+  }
+
+  // Upgrade tracks
+  const upgWrap = document.getElementById('upgrade-tracks');
+  if (upgWrap) {
+    upgWrap.innerHTML = '';
+    Object.values(CONFIG.UPGRADES).forEach(track => {
+      const owned = State.upgrades[track.id] || 0;
+      const next = owned < track.tiers.length ? track.tiers[owned] : null;
+      const el = document.createElement('div');
+      el.className = 'upgrade-track';
+      el.innerHTML = `
+        <div class="ut-head"><span class="ut-icon">${track.icon}</span><span class="ut-name">${track.name}</span></div>
+        <div class="ut-desc">${track.desc}</div>
+        <div class="ut-pips">${track.tiers.map((_, i) => `<span class="ut-pip${i < owned ? ' owned' : ''}"></span>`).join('')}</div>
+        <div class="ut-bonus">${owned > 0 ? track.fmt(track.tiers[owned - 1].bonus) : 'No upgrades'}</div>
+        ${next
+          ? `<button class="ut-buy${State.gold >= next.cost ? '' : ' cant'}" data-track="${track.id}">◆ ${next.cost} — ${track.fmt(next.bonus)}</button>`
+          : '<div class="ut-max">MASTERWORK</div>'}
+      `;
+      upgWrap.appendChild(el);
+    });
+    upgWrap.querySelectorAll('.ut-buy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.track;
+        const track = CONFIG.UPGRADES[id];
+        const owned = State.upgrades[id] || 0;
+        const next = track.tiers[owned];
+        if (next && State.spendGold(next.cost)) {
+          State.upgrades[id] = owned + 1;
+          State.save();
+          Audio.play('missionComplete');
+        } else {
+          Audio.play('ui');
+        }
+        updateForgeUI();
+      });
+    });
+  }
+}
+
+// ────────────────────────────────────────────
+// BOUNTY BOARD OVERLAY
+// ────────────────────────────────────────────
+export function openBountyBoard() {
+  const overlay = document.getElementById('bounty-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('hidden');
+  renderBounties();
+  document.exitPointerLock && document.exitPointerLock();
+}
+
+export function closeBountyBoard() {
+  const overlay = document.getElementById('bounty-overlay');
+  if (overlay) overlay.classList.add('hidden');
+}
+
+function renderBounties() {
+  const wrap = document.getElementById('bounty-posters');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  if (State.activeBounty) {
+    const b = State.activeBounty;
+    const el = document.createElement('div');
+    el.className = 'bounty-poster active-hunt';
+    el.innerHTML = `
+      <div class="bp-wanted">ACTIVE HUNT</div>
+      <div class="bp-name">${b.name}</div>
+      <div class="bp-crime">${b.crime}</div>
+      <div class="bp-reward">◆ ${b.reward} GOLD</div>
+      <div class="bp-hint">Last seen: ${b.regionHint}</div>
     `;
+    wrap.appendChild(el);
+  }
 
-    card.addEventListener('click', () => {
-      if (isUnlocked) {
-        State.selectedMech = mech.id;
-        State.save();
-        updateHangarUI();
-      } else if (canAfford && mech.price > 0) {
-        State.gold -= mech.price;
-        State.unlockMech(mech.id);
-        State.selectedMech = mech.id;
-        State.save();
-        updateHangarUI();
-      } else {
-        // Shake animation
-        card.classList.add('shake');
-        setTimeout(() => card.classList.remove('shake'), 400);
-      }
+  getAvailableBounties().forEach(b => {
+    const el = document.createElement('div');
+    el.className = 'bounty-poster';
+    el.innerHTML = `
+      <div class="bp-wanted">WANTED — DEAD</div>
+      <div class="bp-name">${b.name}</div>
+      <div class="bp-crime">${b.crime}</div>
+      <div class="bp-reward">◆ ${b.reward} GOLD</div>
+      <div class="bp-hint">Last seen: ${b.regionHint}</div>
+      <button class="bp-accept" data-bounty="${b.id}">TAKE THE CONTRACT</button>
+    `;
+    wrap.appendChild(el);
+  });
+
+  wrap.querySelectorAll('.bp-accept').forEach(btn => {
+    btn.addEventListener('click', () => {
+      acceptBounty(btn.dataset.bounty);
+      renderBounties();
     });
-
-    selection.appendChild(card);
   });
 }
 
-export function updateStoryMap() {
-  // Update level nodes
-  document.querySelectorAll('.level-node').forEach(node => {
-    const levelId = node.dataset.level;
-    if (!levelId) return;
-    node.classList.remove('locked', 'unlocked', 'completed');
-    if (State.isLevelUnlocked(levelId)) {
-      const levelMissions = CONFIG.STORY_MISSIONS.filter(m => m.level === levelId);
-      const allComplete = levelMissions.every(m => State.isMissionComplete(m.id));
-      if (allComplete && levelMissions.length > 0) {
-        node.classList.add('completed');
-      } else {
-        node.classList.add('unlocked');
-      }
-    } else {
-      node.classList.add('locked');
-    }
-
-    // Click handler
-    node.addEventListener('click', () => {
-      if (!State.isLevelUnlocked(levelId)) return;
-      const missionForLevel = CONFIG.STORY_MISSIONS.find(m => m.level === levelId);
-      if (!missionForLevel) return;
-
-      document.querySelectorAll('.level-node').forEach(n => n.classList.remove('active-node'));
-      node.classList.add('active-node');
-
-      const titleEl = document.getElementById('selected-mission-title');
-      const descEl = document.getElementById('selected-mission-desc');
-      const rewardEl = document.getElementById('mission-reward');
-      const startBtn = document.getElementById('start-mission-btn');
-
-      if (titleEl) titleEl.textContent = missionForLevel.title;
-      if (descEl) descEl.textContent = missionForLevel.description;
-      if (rewardEl) {
-        rewardEl.innerHTML = `
-          <div class="reward-gold"><span class="gold-icon">◆</span> ${missionForLevel.reward.gold} Gold</div>
-          ${missionForLevel.reward.unlocks ? `<div class="reward-unlock">Unlocks: ${missionForLevel.reward.unlocks.toUpperCase()} Mech</div>` : ''}
-        `;
-      }
-      if (startBtn) {
-        startBtn.dataset.level = levelId;
-        startBtn.dataset.missionId = missionForLevel.id;
-        startBtn.style.display = 'block';
-      }
-    });
-  });
-
-  // Update path elements
-  document.querySelectorAll('.map-path').forEach(path => {
-    const fromLevel = path.dataset.from;
-    const toLevel = path.dataset.to;
-    if (fromLevel && toLevel) {
-      if (State.isLevelUnlocked(fromLevel) && State.isLevelUnlocked(toLevel)) {
-        path.classList.add('unlocked');
-      }
-    }
-  });
+// ────────────────────────────────────────────
+// WORLD MAP OVERLAY (M key)
+// ────────────────────────────────────────────
+export function toggleMapOverlay(forceClose = false) {
+  const overlay = document.getElementById('map-overlay');
+  if (!overlay) return false;
+  const isOpen = !overlay.classList.contains('hidden');
+  if (isOpen || forceClose) {
+    overlay.classList.add('hidden');
+    return false;
+  }
+  overlay.classList.remove('hidden');
+  const canvas = document.getElementById('world-map-canvas');
+  if (canvas) renderWorldMap(canvas, { live: true, mission: State.currentMission });
+  return true;
 }
 
+// ────────────────────────────────────────────
+// MISSION COMPLETE
+// ────────────────────────────────────────────
 export function showMissionComplete(stats) {
   const screen = document.getElementById('mission-complete-screen');
   if (!screen) return;
   screen.classList.remove('hidden');
   screen.style.display = '';
 
-  const goldEl = document.getElementById('complete-gold');
-  const killsEl = document.getElementById('complete-kills');
+  setText('complete-gold', `+${stats.goldEarned || 0}`);
+  setText('complete-kills', stats.kills || 0);
   const timeEl = document.getElementById('complete-time');
-  const unlockEl = document.getElementById('complete-unlock');
-
-  if (goldEl) goldEl.textContent = `+${stats.goldEarned || 0}`;
-  if (killsEl) killsEl.textContent = stats.kills || 0;
   if (timeEl) {
     const secs = Math.floor((stats.time || 0) / 1000);
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    timeEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    timeEl.textContent = `${Math.floor(secs / 60)}:${(secs % 60).toString().padStart(2, '0')}`;
   }
+  const unlockEl = document.getElementById('complete-unlock');
   if (unlockEl) {
     if (stats.unlocks) {
-      unlockEl.textContent = `UNLOCKED: ${stats.unlocks.toUpperCase()} MECH`;
+      unlockEl.textContent = `NEW ENGINE FORGED: ${CONFIG.MECHS[stats.unlocks] ? CONFIG.MECHS[stats.unlocks].name : stats.unlocks}`;
       unlockEl.style.display = 'block';
     } else {
       unlockEl.style.display = 'none';
     }
   }
-
   State.save();
 }
 
+function setText(id, v) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = v;
+}
+
+// ────────────────────────────────────────────
+// GLOBAL UI WIRING
+// ────────────────────────────────────────────
 export function initUI() {
-  // Attach data-action buttons
+  // First user gesture unlocks audio
+  document.addEventListener('pointerdown', () => Audio.unlock(), { once: true });
+
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
+    Audio.play('ui');
     handleMenuAction(btn.dataset.action, btn);
   });
 
-  // Start mission button
+  // Deploy mission
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest('#start-mission-btn');
-    if (!btn) return;
-    const levelId = btn.dataset.level;
-    const missionId = btn.dataset.missionId;
-    if (!levelId || !missionId) return;
-    const mission = CONFIG.STORY_MISSIONS.find(m => m.id === missionId);
-    if (!mission) return;
-
-    // Deep clone mission objectives so we don't mutate CONFIG
-    const missionCopy = {
-      ...mission,
-      objectives: mission.objectives.map(o => ({ ...o, current: 0, complete: false }))
-    };
-
-    document.dispatchEvent(new CustomEvent('startMission', {
-      detail: { levelId, mission: missionCopy }
-    }));
+    const btn = e.target.closest('#deploy-mission-btn');
+    if (!btn || !btn.dataset.missionId) return;
+    document.dispatchEvent(new CustomEvent('startMission', { detail: { missionId: btn.dataset.missionId } }));
   });
 
-  // Window resize
-  window.addEventListener('resize', () => {
-    // handled in engine.js
-  });
-
-  // Initial screen hide setup - just ensure game-container is hidden
   const gameContainer = document.getElementById('game-container');
   if (gameContainer) {
     gameContainer.style.display = 'none';
@@ -256,20 +452,18 @@ export function initUI() {
   }
 }
 
-function handleMenuAction(action, btn) {
+function handleMenuAction(action) {
   switch (action) {
-    case 'story-mode':
-      State.mode = 'story';
-      updateStoryMap();
-      showScreen('story-map-screen');
-      break;
     case 'free-mode':
-      State.mode = 'free';
       document.dispatchEvent(new CustomEvent('startFreeMode'));
       break;
-    case 'hangar':
-      updateHangarUI();
-      showScreen('hangar-screen');
+    case 'campaign':
+      updateCampaignUI();
+      showScreen('campaign-screen');
+      break;
+    case 'forge':
+      updateForgeUI();
+      showScreen('forge-screen');
       break;
     case 'controls':
       showScreen('controls-screen');
@@ -281,47 +475,39 @@ function handleMenuAction(action, btn) {
       document.dispatchEvent(new CustomEvent('resumeGame'));
       break;
     case 'restart':
+    case 'deploy-again':
       document.dispatchEvent(new CustomEvent('restartGame'));
       break;
+    case 'sound-toggle': {
+      Audio.setEnabled(!State.soundOn);
+      const btn = document.getElementById('sound-toggle-btn');
+      if (btn) btn.textContent = State.soundOn ? '♪ SOUND: ON' : '♪ SOUND: OFF';
+      break;
+    }
+    case 'close-bounty':
+      closeBountyBoard();
+      document.dispatchEvent(new CustomEvent('overlayClosed'));
+      break;
+    case 'close-map':
+      toggleMapOverlay(true);
+      document.dispatchEvent(new CustomEvent('overlayClosed'));
+      break;
     case 'next-mission': {
-      const currentMission = State.currentMission;
-      if (currentMission) {
-        const idx = CONFIG.STORY_MISSIONS.findIndex(m => m.id === currentMission.id);
-        if (idx < CONFIG.STORY_MISSIONS.length - 1) {
-          const next = CONFIG.STORY_MISSIONS[idx + 1];
-          if (State.isLevelUnlocked(next.level)) {
-            const nextCopy = {
-              ...next,
-              objectives: next.objectives.map(o => ({ ...o, current: 0, complete: false }))
-            };
-            document.dispatchEvent(new CustomEvent('startMission', {
-              detail: { levelId: next.level, mission: nextCopy }
-            }));
-          } else {
-            showScreen('story-map-screen');
-            updateStoryMap();
-          }
-        } else {
-          showScreen('main-menu');
-        }
+      const cur = State.currentMission;
+      const curId = cur ? cur.id : (State.lastMissionId || State.completedMissions[State.completedMissions.length - 1] || null);
+      const idx = CONFIG.MISSIONS.findIndex(m => m.id === curId);
+      const next = idx >= 0 && idx < CONFIG.MISSIONS.length - 1 ? CONFIG.MISSIONS[idx + 1] : null;
+      if (next && State.isMissionUnlocked(next.id)) {
+        document.dispatchEvent(new CustomEvent('startMission', { detail: { missionId: next.id } }));
+      } else {
+        updateCampaignUI();
+        showScreen('campaign-screen');
       }
       break;
     }
-    case 'hangar-back':
-    case 'controls-back':
-    case 'story-back':
-      showScreen('main-menu');
-      break;
-    case 'complete-continue':
-      showScreen('story-map-screen');
-      updateStoryMap();
-      break;
-    case 'complete-armory':
-      updateHangarUI();
-      showScreen('hangar-screen');
-      break;
-    case 'deploy-again':
-      document.dispatchEvent(new CustomEvent('restartGame'));
+    case 'complete-forge':
+      updateForgeUI();
+      showScreen('forge-screen');
       break;
   }
 }

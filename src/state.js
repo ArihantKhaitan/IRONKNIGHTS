@@ -1,134 +1,136 @@
-// src/state.js - Central game state management
+// src/state.js - Central game state and save/load
 import { CONFIG } from './config.js';
 
+const SAVE_KEY = 'ironKnights_ashfall_v3';
+
 export const State = {
-  // Screen management
+  // Screen / mode
   screen: 'loading',
-  mode: 'story', // 'story' | 'free'
-  selectedMech: 'striker',
+  mode: 'free',            // 'story' | 'free'
+  selectedMech: 'squire',
 
   // Progression
   gold: 0,
-  unlockedMechs: ['striker'],
+  unlockedMechs: ['squire'],
   completedMissions: [],
-  unlockedLevels: ['VILLAGE'],
+  unlockedMissions: ['M1'],
+  upgrades: { damage: 0, armor: 0, boost: 0 },   // tier owned per track (0-3)
+  discoveredShrines: [],
+  soundOn: true,
 
-  // Level state
-  currentLevel: 'VILLAGE',
-  currentMission: null,
+  // World / runtime
+  currentMission: null,     // live mission object (cloned)
+  currentRegion: 'EMBERFALL',
+  timeOfDay: CONFIG.WORLD.startTime, // 0..1 (0 = midnight)
+  storm: 0,                 // 0..1 ash-storm intensity
+  respawnPoint: { x: 0, z: 420 },
+  activeBounty: null,       // { id, name, crime, x, z, reward }
+  clearedCamps: [],         // camp ids cleared this session
 
   // Player runtime stats
   player: {
-    health: 300,
-    maxHealth: 300,
-    shield: 150,
-    maxShield: 150,
-    boost: 100,
-    maxBoost: 100,
-    ammo: 60,
-    maxAmmo: 60,
-    score: 0,
-    kills: 0,
-    wave: 1
+    health: 320, maxHealth: 320,
+    shield: 140, maxShield: 140,
+    boost: 100, maxBoost: 100,
+    ammo: 60, maxAmmo: 60,
+    score: 0, kills: 0
   },
 
-  // Input state
+  // Input
   keys: {},
-  mouse: {
-    dx: 0,
-    dy: 0,
-    locked: false,
-    leftDown: false,
-    rightDown: false
-  },
+  mouse: { dx: 0, dy: 0, locked: false, leftDown: false, rightDown: false },
 
-  // Game flow flags
+  // Flow flags
   isPlaying: false,
   isPaused: false,
   isGameOver: false,
-  isFlying: false,
 
+  // ── Derived stat helpers ──────────────────
+  damageMultiplier() {
+    const t = this.upgrades.damage;
+    return 1 + (t > 0 ? CONFIG.UPGRADES.damage.tiers[t - 1].bonus : 0);
+  },
+  armorMultiplier() {
+    const t = this.upgrades.armor;
+    return 1 + (t > 0 ? CONFIG.UPGRADES.armor.tiers[t - 1].bonus : 0);
+  },
+  boostMultiplier() {
+    const t = this.upgrades.boost;
+    return 1 + (t > 0 ? CONFIG.UPGRADES.boost.tiers[t - 1].bonus : 0);
+  },
+
+  // ── Persistence ───────────────────────────
   save() {
     try {
-      const saveData = {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
         gold: this.gold,
         unlockedMechs: this.unlockedMechs,
         completedMissions: this.completedMissions,
-        unlockedLevels: this.unlockedLevels,
-        selectedMech: this.selectedMech
-      };
-      localStorage.setItem('ironKnights_v2', JSON.stringify(saveData));
-    } catch (e) {
-      console.warn('Failed to save game state:', e);
-    }
+        unlockedMissions: this.unlockedMissions,
+        selectedMech: this.selectedMech,
+        upgrades: this.upgrades,
+        discoveredShrines: this.discoveredShrines,
+        soundOn: this.soundOn
+      }));
+    } catch (e) { console.warn('Save failed:', e); }
   },
 
   load() {
     try {
-      const raw = localStorage.getItem('ironKnights_v2');
-      if (raw) {
-        const data = JSON.parse(raw);
-        this.gold = data.gold || 0;
-        this.unlockedMechs = data.unlockedMechs || ['striker'];
-        this.completedMissions = data.completedMissions || [];
-        this.unlockedLevels = data.unlockedLevels || ['VILLAGE'];
-        this.selectedMech = data.selectedMech || 'striker';
-      }
-      // Apply unlocked status to CONFIG.MECHS
-      for (const [id, mech] of Object.entries(CONFIG.MECHS)) {
-        mech.unlocked = this.unlockedMechs.includes(id);
-      }
-    } catch (e) {
-      console.warn('Failed to load game state:', e);
-    }
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      this.gold = d.gold ?? 0;
+      this.unlockedMechs = d.unlockedMechs ?? ['squire'];
+      this.completedMissions = d.completedMissions ?? [];
+      this.unlockedMissions = d.unlockedMissions ?? ['M1'];
+      this.selectedMech = CONFIG.MECHS[d.selectedMech] ? d.selectedMech : 'squire';
+      this.upgrades = { damage: 0, armor: 0, boost: 0, ...(d.upgrades || {}) };
+      this.discoveredShrines = d.discoveredShrines ?? [];
+      this.soundOn = d.soundOn ?? true;
+      if (!this.unlockedMechs.includes('squire')) this.unlockedMechs.push('squire');
+      if (!this.unlockedMissions.includes('M1')) this.unlockedMissions.push('M1');
+    } catch (e) { console.warn('Load failed:', e); }
   },
 
-  isMechUnlocked(mechId) {
-    return this.unlockedMechs.includes(mechId);
-  },
+  // ── Progression helpers ───────────────────
+  isMechUnlocked(id) { return this.unlockedMechs.includes(id); },
+  isMissionUnlocked(id) { return this.unlockedMissions.includes(id); },
+  isMissionComplete(id) { return this.completedMissions.includes(id); },
 
-  isLevelUnlocked(levelId) {
-    return this.unlockedLevels.includes(levelId);
+  unlockMech(id) {
+    if (id && !this.unlockedMechs.includes(id)) this.unlockedMechs.push(id);
   },
-
-  isMissionComplete(missionId) {
-    return this.completedMissions.includes(missionId);
+  unlockMission(id) {
+    if (id && !this.unlockedMissions.includes(id)) this.unlockedMissions.push(id);
   },
-
-  unlockMech(mechId) {
-    if (!this.unlockedMechs.includes(mechId)) {
-      this.unlockedMechs.push(mechId);
-      if (CONFIG.MECHS[mechId]) CONFIG.MECHS[mechId].unlocked = true;
-    }
+  completeMission(id) {
+    if (id && !this.completedMissions.includes(id)) this.completedMissions.push(id);
   },
-
-  unlockLevel(levelId) {
-    if (levelId && !this.unlockedLevels.includes(levelId)) {
-      this.unlockedLevels.push(levelId);
-    }
+  addGold(n) {
+    this.gold += Math.max(0, Math.floor(n));
   },
-
-  completeMission(missionId) {
-    if (!this.completedMissions.includes(missionId)) {
-      this.completedMissions.push(missionId);
-    }
+  spendGold(n) {
+    if (this.gold < n) return false;
+    this.gold -= n;
+    return true;
   },
 
   resetPlayerStats() {
-    const mech = CONFIG.MECHS[this.selectedMech] || CONFIG.MECHS.striker;
-    this.player.health = mech.health;
-    this.player.maxHealth = mech.health;
-    this.player.shield = mech.shield;
-    this.player.maxShield = mech.shield;
-    this.player.boost = 100;
-    this.player.maxBoost = 100;
-    this.player.ammo = mech.maxAmmo;
+    const mech = CONFIG.MECHS[this.selectedMech] || CONFIG.MECHS.squire;
+    const armorMul = this.armorMultiplier();
+    const boostMul = this.boostMultiplier();
+    this.player.maxHealth = Math.round(mech.health * armorMul);
+    this.player.health = this.player.maxHealth;
+    this.player.maxShield = Math.round(mech.shield * armorMul);
+    this.player.shield = this.player.maxShield;
+    this.player.maxBoost = Math.round(100 * boostMul);
+    this.player.boost = this.player.maxBoost;
     this.player.maxAmmo = mech.maxAmmo;
+    this.player.ammo = mech.maxAmmo;
     this.player.score = 0;
     this.player.kills = 0;
-    this.player.wave = 1;
     this.isGameOver = false;
     this.isPaused = false;
-    this.isFlying = false;
   }
 };

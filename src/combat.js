@@ -1,16 +1,17 @@
-// src/combat.js - Projectiles, melee, damage
+// src/combat.js - Projectiles, heavy shot, melee, damage
 import * as THREE from 'three';
 import { scene } from './engine.js';
 import { CONFIG } from './config.js';
 import { State } from './state.js';
-import { playerMesh, getShootOrigin, canShoot } from './player.js';
+import { playerMesh, getShootOrigin, canShootPrimary, canShootHeavy, cameraYaw } from './player.js';
 import { enemies, currentBoss } from './enemies.js';
-import { spawnExplosion, spawnHitSpark, triggerCameraShake } from './effects.js';
+import { spawnExplosion, spawnHitSpark, spawnMuzzleFlash, spawnSwordArc, triggerCameraShake } from './effects.js';
+import { terrainHeight } from './world.js';
+import { Audio } from './audio.js';
 
 export let projectiles = [];
 
-const MELEE_COOLDOWN = 0.8; // seconds
-let meleeCooldownTimer = 0;
+const MELEE_COOLDOWN = 0.7;
 let lastMeleeTime = 0;
 
 export function clearProjectiles() {
@@ -22,142 +23,159 @@ export function clearProjectiles() {
   projectiles = [];
 }
 
-function createProjectileMesh(color, isPlayer) {
-  const geo = new THREE.CylinderGeometry(0.08, 0.08, 0.8, 6);
+function createProjectileMesh(color, heavy = false) {
+  const geo = heavy
+    ? new THREE.SphereGeometry(0.45, 8, 8)
+    : new THREE.CylinderGeometry(0.09, 0.09, 1.0, 6);
   const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(color) });
   const mesh = new THREE.Mesh(geo, mat);
-
-  // Glow light
-  const light = new THREE.PointLight(new THREE.Color(color), 1.5, 8);
+  const light = new THREE.PointLight(new THREE.Color(color), heavy ? 2.2 : 1.2, heavy ? 14 : 8);
   mesh.add(light);
-
   return mesh;
 }
 
-export function firePlayerProjectile() {
+export function firePlayerPrimary() {
   const origin = getShootOrigin();
-  if (!origin) return;
-  if (!canShoot()) return;
+  if (!origin || !canShootPrimary()) return;
 
-  const mechCfg = CONFIG.MECHS[State.selectedMech] || CONFIG.MECHS.striker;
-  const mesh = createProjectileMesh(mechCfg.color, true);
-
-  // Align cylinder to direction
+  const mechCfg = CONFIG.MECHS[State.selectedMech] || CONFIG.MECHS.squire;
+  const mesh = createProjectileMesh(mechCfg.color);
   const dir = origin.direction.clone();
   mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
   mesh.position.copy(origin.position);
-
   scene.add(mesh);
+
   projectiles.push({
-    mesh,
-    direction: dir,
-    speed: 80,
-    life: 2.5,
-    maxLife: 2.5,
-    isPlayer: true,
-    damage: mechCfg.damage,
+    mesh, direction: dir, speed: 95, life: 2.2,
+    isPlayer: true, heavy: false,
+    damage: mechCfg.damage * State.damageMultiplier(),
     color: mechCfg.color
   });
+
+  spawnMuzzleFlash(origin.position, mechCfg.color);
+  Audio.play('shot');
+  triggerCameraShake(0.12);
 }
 
-export function spawnEnemyProjectile(position, direction, damage) {
-  const mesh = createProjectileMesh('#ff0044', false);
+export function firePlayerHeavy() {
+  const origin = getShootOrigin();
+  if (!origin || !canShootHeavy()) return;
+
+  const mechCfg = CONFIG.MECHS[State.selectedMech] || CONFIG.MECHS.squire;
+  const mesh = createProjectileMesh('#ff7a2f', true);
+  const dir = origin.direction.clone();
+  mesh.position.copy(origin.position);
+  scene.add(mesh);
+
+  projectiles.push({
+    mesh, direction: dir, speed: 60, life: 3.0,
+    isPlayer: true, heavy: true, aoe: 9,
+    damage: mechCfg.heavyDamage * State.damageMultiplier(),
+    color: '#ff7a2f'
+  });
+
+  spawnMuzzleFlash(origin.position, '#ff7a2f');
+  Audio.play('heavyShot');
+  triggerCameraShake(0.6);
+}
+
+export function spawnEnemyProjectile(position, direction, damage, speed = 48, color = '#ff5533') {
+  const mesh = createProjectileMesh(color);
   const dir = direction.clone().normalize();
   mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
   mesh.position.copy(position);
-
   scene.add(mesh);
   projectiles.push({
-    mesh,
-    direction: dir,
-    speed: 50,
-    life: 3.0,
-    maxLife: 3.0,
-    isPlayer: false,
-    damage,
-    color: '#ff0044'
+    mesh, direction: dir, speed, life: 3.5,
+    isPlayer: false, heavy: false, damage, color
   });
+  Audio.play('enemyShot');
 }
 
+// ── Melee: sword arc in front of the mech ──
 export function tryMeleeAttack() {
   const now = performance.now() / 1000;
-  if (now - lastMeleeTime < MELEE_COOLDOWN) return false;
-  if (!playerMesh) return false;
+  if (now - lastMeleeTime < MELEE_COOLDOWN || !playerMesh) return false;
   lastMeleeTime = now;
 
+  const mechCfg = CONFIG.MECHS[State.selectedMech] || CONFIG.MECHS.squire;
   const playerPos = playerMesh.position;
-  let hitAny = false;
+  const facing = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(0, cameraYaw, 0, 'YXZ'));
 
+  spawnSwordArc(playerMesh, mechCfg.accentColor);
+  Audio.play('melee');
+
+  let hitAny = false;
   const allEnemies = [...enemies];
   if (currentBoss) allEnemies.push(currentBoss);
 
+  const meleeDamage = 45 * State.damageMultiplier() * (mechCfg.scale > 1.15 ? 1.5 : 1);
+
   allEnemies.forEach(enemy => {
     if (!enemy || !enemy.mesh) return;
-    const dist = playerPos.distanceTo(enemy.mesh.position);
-    if (dist < 8) {
-      dealDamageToEnemy(enemy, 35);
-      spawnHitSpark(enemy.mesh.position.clone().add(new THREE.Vector3(0, 2, 0)), '#00fff9');
-      hitAny = true;
-    }
+    const toEnemy = new THREE.Vector3().subVectors(enemy.mesh.position, playerPos);
+    toEnemy.y = 0;
+    const dist = toEnemy.length();
+    if (dist > 9 + enemy.scale) return;
+    // Frontal 150° arc
+    toEnemy.normalize();
+    if (facing.dot(toEnemy) < -0.26 && dist > 3) return;
+    dealDamageToEnemy(enemy, meleeDamage);
+    spawnHitSpark(enemy.mesh.position.clone().add(new THREE.Vector3(0, 2.5, 0)), mechCfg.accentColor);
+    hitAny = true;
   });
 
   if (hitAny) {
+    Audio.play('meleeHit');
     triggerCameraShake(0.8);
-    document.dispatchEvent(new CustomEvent('meleeHit'));
   }
-
   return hitAny;
 }
 
+// ── Damage to enemies ──
 export function dealDamageToEnemy(enemy, damage) {
   if (!enemy || enemy.health <= 0) return;
   enemy.health -= damage;
 
-  // Flash red
+  // Red damage flash
   enemy.mesh.traverse(child => {
     if (child.isMesh && child.material && child.material.emissive) {
-      const origEmissive = child.material.emissive.clone();
-      const origIntensity = child.material.emissiveIntensity;
-      child.material.emissive.set(0xff0000);
-      child.material.emissiveIntensity = 1.0;
+      const orig = child.material.emissive.getHex();
+      const origI = child.material.emissiveIntensity;
+      child.material.emissive.setHex(0xff2200);
+      child.material.emissiveIntensity = 0.9;
       setTimeout(() => {
         if (child.material) {
-          child.material.emissive.copy(origEmissive);
-          child.material.emissiveIntensity = origIntensity;
+          child.material.emissive.setHex(orig);
+          child.material.emissiveIntensity = origI;
         }
-      }, 120);
+      }, 100);
     }
   });
 
   if (enemy.health <= 0) {
-    // Kill enemy
     enemy.health = 0;
-    spawnExplosion(enemy.mesh.position.clone().add(new THREE.Vector3(0, 2, 0)), enemy.color);
-    triggerCameraShake(enemy.isBoss ? 3.0 : 1.0);
+    spawnExplosion(enemy.mesh.position.clone().add(new THREE.Vector3(0, 2, 0)), enemy.color, enemy.isBoss ? 40 : 20);
+    triggerCameraShake(enemy.isBoss ? 3.0 : 0.9);
+    Audio.play(enemy.isBoss ? 'bigExplosion' : 'explosion');
 
-    // Add rewards
-    State.gold += Math.floor(enemy.goldReward * (CONFIG.LEVELS[State.currentLevel]?.goldPerKill || 1));
+    State.addGold(enemy.goldReward);
     State.player.score += enemy.scoreReward;
     State.player.kills += 1;
 
     if (enemy.isBoss) {
       scene.remove(enemy.mesh);
-      // Clear currentBoss ref - handled via event
       document.dispatchEvent(new CustomEvent('bossDefeated', { detail: { boss: enemy } }));
-      // Hide boss health bar
       const bossContainer = document.getElementById('boss-health-container');
       if (bossContainer) bossContainer.classList.add('hidden');
     } else {
-      // Remove from enemies array
       const idx = enemies.indexOf(enemy);
       if (idx !== -1) enemies.splice(idx, 1);
       scene.remove(enemy.mesh);
     }
 
     document.dispatchEvent(new CustomEvent('enemyKilled', { detail: { enemy } }));
-
-    // Update kill feed
-    addKillFeed(enemy.isBoss ? enemy.config.name : enemy.type);
+    addKillFeed(enemy.name || enemy.type);
   }
 }
 
@@ -166,32 +184,31 @@ function addKillFeed(name) {
   if (!feed) return;
   const item = document.createElement('div');
   item.className = 'kill-feed-item';
-  item.textContent = `+ ${name.toUpperCase()} DESTROYED`;
+  item.textContent = `✕ ${String(name).toUpperCase()} DESTROYED`;
   feed.appendChild(item);
+  while (feed.children.length > 5) feed.removeChild(feed.firstChild);
   setTimeout(() => {
     item.classList.add('fade-out');
     setTimeout(() => item.remove(), 500);
-  }, 2000);
+  }, 2200);
 }
 
+// ── Damage to the player ──
 export function takeDamage(amount) {
-  if (State.isGameOver) return;
+  if (State.isGameOver || !State.isPlaying) return;
 
   let remaining = amount;
-
-  // Shield absorbs first
   if (State.player.shield > 0) {
-    const shieldAbs = Math.min(State.player.shield, remaining);
-    State.player.shield -= shieldAbs;
-    remaining -= shieldAbs;
+    const abs = Math.min(State.player.shield, remaining);
+    State.player.shield -= abs;
+    remaining -= abs;
   }
-
-  // Then health
   if (remaining > 0) {
     State.player.health -= remaining;
-    showDamageIndicators();
-    triggerCameraShake(remaining * 0.05);
+    triggerCameraShake(Math.min(2, remaining * 0.05));
   }
+  showDamageIndicators();
+  Audio.play('hurt');
 
   if (State.player.health <= 0) {
     State.player.health = 0;
@@ -200,103 +217,127 @@ export function takeDamage(amount) {
 }
 
 function showDamageIndicators() {
-  const indicators = document.querySelectorAll('.damage-indicator');
-  indicators.forEach(ind => {
+  document.querySelectorAll('.damage-indicator').forEach(ind => {
     ind.classList.add('active');
     setTimeout(() => ind.classList.remove('active'), 300);
   });
 }
 
+// ── Ground slam ability ──
 export function handleGroundSlam(position) {
   const allEnemies = [...enemies];
   if (currentBoss) allEnemies.push(currentBoss);
 
   const slamRadius = 25;
-  let hitCount = 0;
+  const slamDamage = 90 * State.damageMultiplier();
   allEnemies.forEach(enemy => {
     if (!enemy || !enemy.mesh) return;
     const dist = position.distanceTo(enemy.mesh.position);
     if (dist < slamRadius) {
-      const falloff = 1 - (dist / slamRadius);
-      dealDamageToEnemy(enemy, Math.floor(80 * falloff));
-      hitCount++;
+      dealDamageToEnemy(enemy, Math.floor(slamDamage * (1 - dist / slamRadius) + 15));
     }
   });
 
-  // Large explosion
-  spawnExplosion(position, '#c9a227');
+  spawnExplosion(position.clone().add(new THREE.Vector3(0, 1, 0)), '#c9a227', 30);
+  Audio.play('bigExplosion');
   for (let i = 0; i < 6; i++) {
     const angle = (i / 6) * Math.PI * 2;
-    const r = 8 + Math.random() * 15;
-    const ep = position.clone().add(new THREE.Vector3(Math.cos(angle) * r, 0, Math.sin(angle) * r));
-    setTimeout(() => spawnExplosion(ep, '#ff6600'), i * 80);
+    const r = 8 + Math.random() * 14;
+    const ep = position.clone().add(new THREE.Vector3(Math.cos(angle) * r, 1, Math.sin(angle) * r));
+    setTimeout(() => spawnExplosion(ep, '#ff7a2f', 12), i * 70);
   }
 }
 
+// ── Heavy shot AoE detonation ──
+function detonate(proj) {
+  spawnExplosion(proj.mesh.position.clone(), '#ff7a2f', 24);
+  Audio.play('explosion');
+  triggerCameraShake(0.7);
+  const allEnemies = [...enemies];
+  if (currentBoss) allEnemies.push(currentBoss);
+  allEnemies.forEach(enemy => {
+    if (!enemy || !enemy.mesh) return;
+    const dist = proj.mesh.position.distanceTo(enemy.mesh.position);
+    if (dist < proj.aoe + enemy.scale * 2) {
+      dealDamageToEnemy(enemy, proj.damage * Math.max(0.35, 1 - dist / (proj.aoe + enemy.scale * 2)));
+    }
+  });
+}
+
+// ── Per-frame projectile update ──
 export function updateProjectiles(dt) {
   if (!State.isPlaying) return;
 
   const playerPos = playerMesh ? playerMesh.position : new THREE.Vector3();
-
-  // Process shoot pending from enemies
   const allEnemies = [...enemies];
   if (currentBoss) allEnemies.push(currentBoss);
 
+  // Drain enemy fire queues (ranged shots + hound bites)
   allEnemies.forEach(enemy => {
-    if (!enemy.mesh || !enemy.mesh.userData.shootPending) return;
-    const pending = enemy.mesh.userData.shootPending;
+    const pending = enemy.mesh && enemy.mesh.userData.shootPending;
+    if (!pending) return;
     while (pending.length > 0) {
       const shot = pending.shift();
-      spawnEnemyProjectile(shot.from, shot.dir, shot.damage);
+      if (shot.melee) {
+        // Bite only lands if still close
+        if (enemy.mesh.position.distanceTo(playerPos) < (enemy.meleeRange || 5) + 2.5) {
+          takeDamage(shot.damage);
+          spawnHitSpark(playerPos.clone().add(new THREE.Vector3(0, 2, 0)), '#ff5533');
+          Audio.play('meleeHit');
+        }
+      } else {
+        spawnEnemyProjectile(shot.from, shot.dir, shot.damage, shot.speed, shot.color);
+      }
     }
   });
 
-  // Update all projectiles
   const toRemove = [];
   for (let i = projectiles.length - 1; i >= 0; i--) {
     const proj = projectiles[i];
-    if (!proj || !proj.mesh) {
-      toRemove.push(i);
-      continue;
-    }
+    if (!proj || !proj.mesh) { toRemove.push(i); continue; }
 
-    // Move
     proj.mesh.position.addScaledVector(proj.direction, proj.speed * dt);
     proj.life -= dt;
 
+    let dead = false;
+    let exploded = false;
+
     if (proj.life <= 0) {
-      scene.remove(proj.mesh);
-      if (proj.mesh.geometry) proj.mesh.geometry.dispose();
-      if (proj.mesh.material) proj.mesh.material.dispose();
-      toRemove.push(i);
-      continue;
-    }
-
-    let hit = false;
-
-    if (proj.isPlayer) {
-      // Check all enemies
-      for (let j = allEnemies.length - 1; j >= 0; j--) {
+      dead = true;
+    } else if (proj.mesh.position.y < terrainHeight(proj.mesh.position.x, proj.mesh.position.z)) {
+      // Hit the ground
+      if (proj.heavy) { detonate(proj); exploded = true; }
+      else spawnHitSpark(proj.mesh.position.clone(), proj.color);
+      dead = true;
+    } else if (proj.isPlayer) {
+      for (let j = 0; j < allEnemies.length; j++) {
         const enemy = allEnemies[j];
-        if (!enemy || !enemy.mesh) continue;
-        const hitRadius = enemy.scale * 2.5;
-        if (proj.mesh.position.distanceTo(enemy.mesh.position) < hitRadius) {
-          dealDamageToEnemy(enemy, proj.damage);
-          spawnHitSpark(proj.mesh.position.clone(), proj.color);
-          hit = true;
+        if (!enemy || !enemy.mesh || enemy.health <= 0) continue;
+        const hitRadius = enemy.scale * 2.6 + (proj.heavy ? 0.5 : 0);
+        const dy = proj.mesh.position.y - (enemy.mesh.position.y + 2 * enemy.scale);
+        const dh = Math.hypot(proj.mesh.position.x - enemy.mesh.position.x, proj.mesh.position.z - enemy.mesh.position.z);
+        if (dh < hitRadius && Math.abs(dy) < 3.2 * enemy.scale + 1.5) {
+          if (proj.heavy) { detonate(proj); exploded = true; }
+          else {
+            dealDamageToEnemy(enemy, proj.damage);
+            spawnHitSpark(proj.mesh.position.clone(), proj.color);
+            Audio.play('hit');
+          }
+          dead = true;
           break;
         }
       }
     } else {
-      // Check player
-      if (proj.mesh.position.distanceTo(playerPos) < 3) {
+      const dy = proj.mesh.position.y - (playerPos.y + 2.5);
+      const dh = Math.hypot(proj.mesh.position.x - playerPos.x, proj.mesh.position.z - playerPos.z);
+      if (dh < 2.6 && Math.abs(dy) < 4) {
         takeDamage(proj.damage);
-        spawnHitSpark(proj.mesh.position.clone(), '#ff0044');
-        hit = true;
+        spawnHitSpark(proj.mesh.position.clone(), '#ff5533');
+        dead = true;
       }
     }
 
-    if (hit) {
+    if (dead) {
       scene.remove(proj.mesh);
       if (proj.mesh.geometry) proj.mesh.geometry.dispose();
       if (proj.mesh.material) proj.mesh.material.dispose();
@@ -304,8 +345,7 @@ export function updateProjectiles(dt) {
     }
   }
 
-  // Remove in reverse order
-  for (let i = toRemove.length - 1; i >= 0; i--) {
+  for (let i = 0; i < toRemove.length; i++) {
     projectiles.splice(toRemove[i], 1);
   }
 }
