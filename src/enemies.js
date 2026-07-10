@@ -111,7 +111,7 @@ function createWalkerMesh(cfg, isBoss) {
     if (i === 1) {
       const gun = new THREE.Mesh(new THREE.CylinderGeometry(0.15 * sc, 0.2 * sc, 1.2 * sc, 6), darkMat());
       gun.rotation.x = Math.PI / 2;
-      gun.position.set(0, -1.75 * sc, -0.6 * sc);
+      gun.position.set(0, -1.75 * sc, 0.6 * sc);
       arm.add(gun);
     }
     group.add(arm);
@@ -143,8 +143,8 @@ function createWalkerMesh(cfg, isBoss) {
       new THREE.PlaneGeometry(1.8 * sc, 2.6 * sc),
       new THREE.MeshStandardMaterial({ color: 0x3a1512, roughness: 1, side: THREE.DoubleSide })
     );
-    cape.position.set(0, 3.0 * sc, 0.7 * sc);
-    cape.rotation.x = 0.15;
+    cape.position.set(0, 3.0 * sc, -0.7 * sc);
+    cape.rotation.x = -0.15;
     group.add(cape);
   }
 
@@ -171,17 +171,17 @@ function createHoundMesh(cfg) {
   }
 
   const head = new THREE.Mesh(new THREE.BoxGeometry(0.7 * sc, 0.6 * sc, 0.9 * sc), darkMat());
-  head.position.set(0, 1.35 * sc, -1.5 * sc);
+  head.position.set(0, 1.35 * sc, 1.5 * sc);
   group.add(head);
   const eye = new THREE.Mesh(new THREE.SphereGeometry(0.12 * sc, 6, 6), glowMat(cfg.accentColor));
-  eye.position.set(0.18 * sc, 1.4 * sc, -1.9 * sc);
+  eye.position.set(0.18 * sc, 1.4 * sc, 1.9 * sc);
   group.add(eye);
   const eye2 = eye.clone();
   eye2.position.x = -0.18 * sc;
   group.add(eye2);
   // Jaw spikes
   const jaw = new THREE.Mesh(new THREE.ConeGeometry(0.1 * sc, 0.4 * sc, 4), plateMat(cfg.accentColor));
-  jaw.position.set(0, 1.0 * sc, -1.95 * sc);
+  jaw.position.set(0, 1.0 * sc, 1.95 * sc);
   jaw.rotation.x = Math.PI;
   group.add(jaw);
 
@@ -201,8 +201,8 @@ function createHoundMesh(cfg) {
 
   // Tail
   const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.05 * sc, 0.12 * sc, 1.1 * sc, 5), darkMat());
-  tail.position.set(0, 1.5 * sc, 1.6 * sc);
-  tail.rotation.x = -0.7;
+  tail.position.set(0, 1.5 * sc, -1.6 * sc);
+  tail.rotation.x = 0.7;
   group.add(tail);
 
   group.userData.parts = parts;

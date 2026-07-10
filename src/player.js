@@ -161,14 +161,14 @@ export function createPlayer(spawnX = 0, spawnZ = 420) {
       // Right arm: the cannon
       const cannon = new THREE.Mesh(new THREE.CylinderGeometry(0.2 * sc, 0.26 * sc, 1.5 * sc, 8), plateMat('#3a3a40', 0.4));
       cannon.rotation.x = Math.PI / 2;
-      cannon.position.set(0, -1.9 * sc, -0.75 * sc);
+      cannon.position.set(0, -1.9 * sc, 0.75 * sc);
       arm.add(cannon);
       const muzzle = new THREE.Mesh(new THREE.CylinderGeometry(0.26 * sc, 0.26 * sc, 0.25 * sc, 8), trim());
       muzzle.rotation.x = Math.PI / 2;
-      muzzle.position.set(0, -1.9 * sc, -1.55 * sc);
+      muzzle.position.set(0, -1.9 * sc, 1.55 * sc);
       arm.add(muzzle);
       const tip = new THREE.Mesh(new THREE.SphereGeometry(0.14 * sc, 6, 6), glowMat('#ff7a2f'));
-      tip.position.set(0, -1.9 * sc, -1.68 * sc);
+      tip.position.set(0, -1.9 * sc, 1.68 * sc);
       tip.userData.isBarrelTip = true;
       arm.add(tip);
     } else {
@@ -205,31 +205,31 @@ export function createPlayer(spawnX = 0, spawnZ = 420) {
   group.add(crest);
   const plume = new THREE.Mesh(new THREE.ConeGeometry(0.22 * sc, 0.9 * sc, 6), plateMat(mechConfig.plume, 1.0));
   plume.position.set(0, 5.75 * sc, -0.45 * sc);
-  plume.rotation.x = 0.7;
+  plume.rotation.x = -0.7;
   group.add(plume);
 
   // ── Back: pennant pole + thrusters ──
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05 * sc, 0.05 * sc, 3.4 * sc, 5), plateMat('#3a3a40'));
-  pole.position.set(-0.6 * sc, 5.3 * sc, 0.65 * sc);
+  pole.position.set(-0.6 * sc, 5.3 * sc, -0.65 * sc);
   group.add(pole);
   const pennant = new THREE.Mesh(
     new THREE.PlaneGeometry(1.1 * sc, 0.55 * sc),
     new THREE.MeshStandardMaterial({ color: new THREE.Color(mechConfig.plume), roughness: 1, side: THREE.DoubleSide })
   );
-  pennant.position.set(-0.6 * sc, 6.6 * sc, 1.2 * sc);
+  pennant.position.set(-0.6 * sc, 6.6 * sc, -1.2 * sc);
   pennant.userData.isPennant = true;
   group.add(pennant);
   parts.pennant = pennant;
 
   [-0.45, 0.45].forEach((tx) => {
     const thruster = new THREE.Mesh(new THREE.CylinderGeometry(0.28 * sc, 0.38 * sc, 1.3 * sc, 7), plateMat('#3a3a40'));
-    thruster.position.set(tx * sc, 3.6 * sc, 0.72 * sc);
+    thruster.position.set(tx * sc, 3.6 * sc, -0.72 * sc);
     group.add(thruster);
     const boost = new THREE.Mesh(
       new THREE.ConeGeometry(0.32 * sc, 1.2 * sc, 7),
       new THREE.MeshBasicMaterial({ color: new THREE.Color('#ff9a55'), transparent: true, opacity: 0 })
     );
-    boost.position.set(tx * sc, 2.85 * sc, 0.72 * sc);
+    boost.position.set(tx * sc, 2.85 * sc, -0.72 * sc);
     boost.rotation.x = Math.PI;
     boosterGlows.push(boost);
     group.add(boost);
@@ -248,7 +248,7 @@ export function createPlayer(spawnX = 0, spawnZ = 420) {
 export function getShootOrigin() {
   if (!playerMesh) return null;
   const sc = mechConfig ? mechConfig.scale : 1;
-  const localTip = new THREE.Vector3(1.25 * sc, 2.1 * sc, -1.7 * sc);
+  const localTip = new THREE.Vector3(1.25 * sc, 2.1 * sc, 1.7 * sc);
   const worldTip = localTip.applyMatrix4(playerMesh.matrixWorld);
   const dir = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(cameraPitch, cameraYaw, 0, 'YXZ'));
   return { position: worldTip, direction: dir.normalize() };
@@ -444,7 +444,7 @@ export function updatePlayer(dt) {
   if (combatFacing) {
     targetAngle = cameraYaw + Math.PI;
   } else if (moving) {
-    targetAngle = Math.atan2(moveDir.x, moveDir.z) + Math.PI;
+    targetAngle = Math.atan2(moveDir.x, moveDir.z);
   }
   if (targetAngle !== null) {
     let da = targetAngle - playerMesh.rotation.y;
@@ -501,10 +501,11 @@ export function updatePlayer(dt) {
   // ── Camera: over-shoulder follow ──
   const sc = mechConfig.scale;
   const dist = 12 + sc * 3;
+  const cosP = Math.cos(cameraPitch);
   const camOffset = new THREE.Vector3(
-    Math.sin(cameraYaw) * dist + Math.cos(cameraYaw) * 1.8,
-    5.5 + sc + cameraPitch * 11,
-    Math.cos(cameraYaw) * dist - Math.sin(cameraYaw) * 1.8
+    Math.sin(cameraYaw) * dist * cosP + Math.cos(cameraYaw) * 1.8,
+    (4.5 + sc) - Math.sin(cameraPitch) * dist * 0.85,
+    Math.cos(cameraYaw) * dist * cosP - Math.sin(cameraYaw) * 1.8
   );
   camTargetPos.copy(playerMesh.position).add(camOffset);
   const minCamY = terrainHeight(camTargetPos.x, camTargetPos.z) + 1.6;
@@ -512,7 +513,7 @@ export function updatePlayer(dt) {
   camera.position.lerp(camTargetPos, Math.min(1, 9 * dt));
 
   const lookTarget = playerMesh.position.clone().add(new THREE.Vector3(
-    Math.cos(cameraYaw) * 1.2, 3.2 * sc - cameraPitch * 6, -Math.sin(cameraYaw) * 1.2
+    Math.cos(cameraYaw) * 1.2, 3.2 * sc + cameraPitch * 5, -Math.sin(cameraYaw) * 1.2
   ));
   camera.lookAt(lookTarget);
 }

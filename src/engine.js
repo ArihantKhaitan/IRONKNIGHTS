@@ -16,16 +16,16 @@ let clouds = [];
 
 // Palette keyframes across the day (t: 0 = midnight, 0.5 = noon)
 const SKY_STOPS = [
-  { t: 0.00, sky: 0x07070d, fog: 0x0a0a12, sun: 0x223244, amb: 0.16 }, // midnight
-  { t: 0.22, sky: 0x0d0c12, fog: 0x121017, sun: 0x33333f, amb: 0.20 }, // pre-dawn
-  { t: 0.28, sky: 0x6b3a2a, fog: 0x74452f, sun: 0xff9a55, amb: 0.45 }, // dawn
+  { t: 0.00, sky: 0x141828, fog: 0x171a2b, sun: 0x5a6c8c, amb: 0.36 }, // midnight (moonlit)
+  { t: 0.22, sky: 0x181a2b, fog: 0x1b1c2e, sun: 0x5c6480, amb: 0.38 }, // pre-dawn
+  { t: 0.28, sky: 0x6b3a2a, fog: 0x74452f, sun: 0xff9a55, amb: 0.50 }, // dawn
   { t: 0.38, sky: 0x9c7f5e, fog: 0xa08663, sun: 0xffe6bf, amb: 0.72 }, // morning
   { t: 0.50, sky: 0xa89a80, fog: 0xa89878, sun: 0xfff2dc, amb: 0.85 }, // noon (ashy, overcast)
   { t: 0.66, sky: 0x9c7452, fog: 0x9c7048, sun: 0xffd9a0, amb: 0.70 }, // afternoon
   { t: 0.76, sky: 0x8a4a2b, fog: 0x8f4c28, sun: 0xff8a3d, amb: 0.55 }, // golden hour
-  { t: 0.84, sky: 0x3d2230, fog: 0x40242e, sun: 0xb35a4a, amb: 0.30 }, // dusk
-  { t: 0.92, sky: 0x0e0d16, fog: 0x12101a, sun: 0x2a3448, amb: 0.18 }, // night
-  { t: 1.00, sky: 0x07070d, fog: 0x0a0a12, sun: 0x223244, amb: 0.16 }  // midnight
+  { t: 0.84, sky: 0x46283a, fog: 0x482a38, sun: 0xb35a4a, amb: 0.42 }, // dusk
+  { t: 0.92, sky: 0x171a2c, fog: 0x1a1c2e, sun: 0x5a6a8a, amb: 0.37 }, // night
+  { t: 1.00, sky: 0x141828, fog: 0x171a2b, sun: 0x5a6c8c, amb: 0.36 }  // midnight
 ];
 
 const _c1 = new THREE.Color();
@@ -185,10 +185,10 @@ export function updateDayNight(timeOfDay, fogMul, storm, playerPos, dt) {
   moonMesh.lookAt(camera.position);
   moonMesh.material.opacity = Math.max(0, Math.min(0.9, -sunY * 2.4)) * (1 - storm * 0.7);
 
-  // Directional light follows sun by day, dim moonlight by night
+  // Directional light follows sun by day, real moonlight by night
   const dayFactor = Math.max(0, Math.min(1, sunY * 2.2 + 0.1));
   sunLight.color.copy(s.sun);
-  sunLight.intensity = 0.15 + dayFactor * 1.25 * (1 - storm * 0.45);
+  sunLight.intensity = 0.55 + dayFactor * 0.95 * (1 - storm * 0.45);
   const lightY = Math.max(0.12, Math.abs(sunY));
   const lx = dayFactor > 0.05 ? sunX : -sunX;
   sunLight.position.set(px + lx * 220, lightY * 260, pz + 80);

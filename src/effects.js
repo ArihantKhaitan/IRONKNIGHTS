@@ -5,6 +5,40 @@ import { scene } from './engine.js';
 const particles = [];
 export let cameraShake = 0;
 
+// ── Pooled flash lights ─────────────────────────────────────
+// Adding/removing PointLights at runtime forces Three.js to recompile
+// every shader in the scene (major combat stutter). Instead we allocate
+// a fixed pool once and only vary intensity.
+const lightPool = [];
+
+export function initEffectsLights() {
+  if (lightPool.length) return;
+  for (let i = 0; i < 6; i++) {
+    const l = new THREE.PointLight(0xffffff, 0, 50);
+    l.userData.poolLife = 0;
+    l.userData.poolMaxLife = 1;
+    l.userData.poolIntensity = 0;
+    scene.add(l);
+    lightPool.push(l);
+  }
+}
+
+function flashLight(position, color, intensity, life, distance = 45) {
+  if (!lightPool.length) return;
+  let best = null;
+  for (const l of lightPool) {
+    if (l.userData.poolLife <= 0) { best = l; break; }
+    if (!best || l.userData.poolLife < best.userData.poolLife) best = l;
+  }
+  best.position.copy(position);
+  best.color.set(color);
+  best.intensity = intensity;
+  best.distance = distance;
+  best.userData.poolLife = life;
+  best.userData.poolMaxLife = life;
+  best.userData.poolIntensity = intensity;
+}
+
 export function triggerCameraShake(amount) {
   cameraShake = Math.max(cameraShake, amount);
 }
@@ -44,13 +78,8 @@ export function spawnExplosion(position, color, count = 20) {
     pushParticle(p);
   }
 
-  // Flash light
-  const flash = new THREE.PointLight(col, 8, 45);
-  flash.position.copy(position);
-  flash.userData.life = 0.18;
-  flash.userData.maxLife = 0.18;
-  flash.userData.isLight = true;
-  pushParticle(flash);
+  // Flash light (pooled)
+  flashLight(position, col, 8, 0.18, 45);
 
   // Lingering smoke
   for (let i = 0; i < Math.min(6, count / 3); i++) {
@@ -95,12 +124,7 @@ export function spawnHitSpark(position, color) {
 
 export function spawnMuzzleFlash(position, color) {
   const col = new THREE.Color(color || '#ffb35c');
-  const flash = new THREE.PointLight(col, 4, 14);
-  flash.position.copy(position);
-  flash.userData.life = 0.06;
-  flash.userData.maxLife = 0.06;
-  flash.userData.isLight = true;
-  pushParticle(flash);
+  flashLight(position, col, 3, 0.07, 16);
 
   const geo = new THREE.SphereGeometry(0.35, 5, 5);
   const mat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.9 });
@@ -191,6 +215,16 @@ export function updateSmokeSources(dt, sources, playerPos) {
 export function updateEffects(dt) {
   decayCameraShake(dt);
 
+  // Decay pooled flash lights
+  for (const l of lightPool) {
+    if (l.userData.poolLife > 0) {
+      l.userData.poolLife -= dt;
+      const r = Math.max(0, l.userData.poolLife / l.userData.poolMaxLife);
+      l.intensity = l.userData.poolIntensity * r;
+      if (l.userData.poolLife <= 0) l.intensity = 0;
+    }
+  }
+
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
     p.userData.life -= dt;
@@ -242,5 +276,9 @@ export function clearEffects() {
     if (p.material) p.material.dispose();
   });
   particles.length = 0;
+  for (const l of lightPool) {
+    l.intensity = 0;
+    l.userData.poolLife = 0;
+  }
   cameraShake = 0;
 }

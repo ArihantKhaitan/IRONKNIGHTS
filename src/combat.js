@@ -24,13 +24,20 @@ export function clearProjectiles() {
 }
 
 function createProjectileMesh(color, heavy = false) {
+  // No PointLight here: dynamic lights on projectiles force full-scene
+  // shader recompiles and tank the framerate during firefights.
   const geo = heavy
     ? new THREE.SphereGeometry(0.45, 8, 8)
     : new THREE.CylinderGeometry(0.09, 0.09, 1.0, 6);
   const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(color) });
   const mesh = new THREE.Mesh(geo, mat);
-  const light = new THREE.PointLight(new THREE.Color(color), heavy ? 2.2 : 1.2, heavy ? 14 : 8);
-  mesh.add(light);
+
+  // Soft glow shell instead
+  const glow = new THREE.Mesh(
+    new THREE.SphereGeometry(heavy ? 0.95 : 0.32, 6, 6),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(color), transparent: true, opacity: 0.35, depthWrite: false })
+  );
+  mesh.add(glow);
   return mesh;
 }
 
@@ -137,21 +144,25 @@ export function dealDamageToEnemy(enemy, damage) {
   if (!enemy || enemy.health <= 0) return;
   enemy.health -= damage;
 
-  // Red damage flash
-  enemy.mesh.traverse(child => {
-    if (child.isMesh && child.material && child.material.emissive) {
-      const orig = child.material.emissive.getHex();
-      const origI = child.material.emissiveIntensity;
-      child.material.emissive.setHex(0xff2200);
-      child.material.emissiveIntensity = 0.9;
-      setTimeout(() => {
-        if (child.material) {
-          child.material.emissive.setHex(orig);
-          child.material.emissiveIntensity = origI;
-        }
-      }, 100);
-    }
-  });
+  // Red damage flash (guarded so rapid fire doesn't stack timeouts)
+  if (!enemy.flashing) {
+    enemy.flashing = true;
+    const flashed = [];
+    enemy.mesh.traverse(child => {
+      if (child.isMesh && child.material && child.material.emissive) {
+        flashed.push({ mat: child.material, orig: child.material.emissive.getHex(), origI: child.material.emissiveIntensity });
+        child.material.emissive.setHex(0xff2200);
+        child.material.emissiveIntensity = 0.9;
+      }
+    });
+    setTimeout(() => {
+      enemy.flashing = false;
+      for (const f of flashed) {
+        f.mat.emissive.setHex(f.orig);
+        f.mat.emissiveIntensity = f.origI;
+      }
+    }, 100);
+  }
 
   if (enemy.health <= 0) {
     enemy.health = 0;

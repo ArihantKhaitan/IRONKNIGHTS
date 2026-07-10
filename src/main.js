@@ -8,7 +8,7 @@ import { buildWorld, updateWorldAnim, updatePickups, getNearestInteractable, get
 import { createPlayer, updatePlayer, playerMesh, resetPlayer, getPlayerPosition } from './player.js';
 import { clearEnemies, updateEnemies, spawnSquad, enemies, currentBoss } from './enemies.js';
 import { clearProjectiles, updateProjectiles, firePlayerPrimary, firePlayerHeavy, tryMeleeAttack, handleGroundSlam } from './combat.js';
-import { updateEffects, clearEffects, cameraShake, updateAmbient, updateSmokeSources } from './effects.js';
+import { updateEffects, clearEffects, cameraShake, updateAmbient, updateSmokeSources, initEffectsLights } from './effects.js';
 import { updateHUD, updateMinimap, initHUD, showLocationTitle, setInteractionPrompt } from './hud.js';
 import { initUI, showScreen, showMissionComplete, updateCampaignUI, openBountyBoard, toggleMapOverlay } from './ui.js';
 import { initQuests, populateWorld, startMission as questStartMission, cleanupMission, isMissionComplete, useShrine, toast } from './quests.js';
@@ -49,6 +49,7 @@ function ensureWorld() {
   if (worldBuilt) return;
   worldBuilt = true;
   buildWorld();
+  initEffectsLights(); // fixed light pool: keeps the scene's light count stable
   populateWorld();
 }
 
