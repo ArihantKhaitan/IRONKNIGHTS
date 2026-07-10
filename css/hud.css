@@ -102,6 +102,50 @@
   box-shadow: 0 0 6px var(--ember);
 }
 
+/* Hit marker: rotated square that flashes on a landed hit */
+#hit-marker {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 18px; height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 2px solid var(--ember2);
+  transform: rotate(45deg) scale(0.5);
+  opacity: 0;
+  pointer-events: none;
+}
+#hit-marker.show { animation: hitFlash 0.22s ease-out; }
+#hit-marker.kill { border-color: #ff3322; border-width: 3px; }
+@keyframes hitFlash {
+  0% { opacity: 1; transform: rotate(45deg) scale(0.55); }
+  100% { opacity: 0; transform: rotate(45deg) scale(1.5); }
+}
+
+/* Floating damage numbers */
+#damage-numbers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 21;
+}
+.dmg-num {
+  position: absolute;
+  font-family: var(--font-hud);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ember2);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.9);
+  animation: dmgFloat 0.9s ease-out both;
+}
+.dmg-num.kill {
+  color: #ff3322;
+  font-size: 1.35rem;
+}
+@keyframes dmgFloat {
+  0% { opacity: 0; transform: translateY(6px) scale(0.8); }
+  15% { opacity: 1; transform: translateY(0) scale(1.05); }
+  100% { opacity: 0; transform: translateY(-34px) scale(0.95); }
+}
+
 /* ═══ RIGHT: WEAPON + ABILITY ═══ */
 .hud-right {
   position: absolute;

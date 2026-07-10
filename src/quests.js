@@ -156,6 +156,9 @@ function onPickupCollected(e) {
   if (type === 'gold') {
     State.addGold(amount);
     Audio.play('gold');
+  } else if (type === 'repair') {
+    State.player.health = Math.min(State.player.maxHealth, State.player.health + amount);
+    Audio.play('pickup');
   } else if (type === 'relic') {
     Audio.play('pickup');
     const mission = State.currentMission;

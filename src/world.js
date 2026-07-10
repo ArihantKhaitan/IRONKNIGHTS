@@ -938,7 +938,20 @@ export function spawnPickup(x, z, type, amount, permanentRespawn = false) {
   const g = new THREE.Group();
   g.position.set(x, y, z);
 
-  if (type === 'relic') {
+  if (type === 'repair') {
+    // Repair scrap: teal glow orb over a small heap
+    const bit = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.5, 0.8), mats.rust());
+    bit.position.y = 0.3;
+    bit.rotation.y = Math.random() * Math.PI;
+    g.add(bit);
+    const orb = new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 0), mats.glow('#7fd4c1'));
+    orb.position.y = 1.3;
+    g.add(orb);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.07, 5, 16), mats.glow('#7fd4c1'));
+    ring.position.y = 1.3;
+    ring.rotation.x = Math.PI / 2;
+    g.add(ring);
+  } else if (type === 'relic') {
     const core = new THREE.Mesh(
       new THREE.CylinderGeometry(0.7, 0.7, 1.8, 8),
       new THREE.MeshStandardMaterial({ color: 0xff7a2f, emissive: 0xff5522, emissiveIntensity: 1.2, roughness: 0.3, metalness: 0.6 })

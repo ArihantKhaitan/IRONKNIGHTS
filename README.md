@@ -35,6 +35,7 @@ Then open `http://localhost:8000` (or whatever port your server prints) in Chrom
 | `Space` | Hover jets |
 | `R` | Reload |
 | `F` | Interact — wayshrines, bounty board |
+| `V` | Toggle first / third person view |
 | `M` | Kingdom map |
 | `Esc` | Pause / close |
 
@@ -58,6 +59,7 @@ One seamless open world with a full day/night cycle, ash storms, and five region
 - **Wayshrines** — five shrines that heal you and set your respawn point.
 - **Salvage** — glowing scrap piles scattered across the wastes.
 - **Ambient patrols** — raider packs roam the roads. Or the roads roam toward you.
+- **Repair scrap** — fallen enemies have a chance to drop teal repair scrap that patches your hull; bosses always drop it.
 
 ## 🤖 The Engines
 

@@ -11,6 +11,15 @@ import { Audio } from './audio.js';
 export let playerMesh = null;
 export let cameraYaw = 0;
 export let cameraPitch = -0.12;
+export let cameraMode = 'third'; // 'third' | 'first'
+
+export function toggleCameraView() {
+  cameraMode = cameraMode === 'third' ? 'first' : 'third';
+  Audio.play('ui');
+  document.dispatchEvent(new CustomEvent('toast', {
+    detail: { text: cameraMode === 'first' ? 'FIRST PERSON' : 'THIRD PERSON', sub: 'Press [V] to switch view' }
+  }));
+}
 
 const playerVelocity = new THREE.Vector3();
 let hoverY = 0;
@@ -247,11 +256,15 @@ export function createPlayer(spawnX = 0, spawnZ = 420) {
 // ── Shooting hooks (combat.js consumes these) ──
 export function getShootOrigin() {
   if (!playerMesh) return null;
+  const dir = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(cameraPitch, cameraYaw, 0, 'YXZ')).normalize();
+  if (cameraMode === 'first') {
+    // Shoot straight from the eye so the crosshair is exact
+    return { position: camera.position.clone().addScaledVector(dir, 2.4), direction: dir };
+  }
   const sc = mechConfig ? mechConfig.scale : 1;
   const localTip = new THREE.Vector3(1.25 * sc, 2.1 * sc, 1.7 * sc);
   const worldTip = localTip.applyMatrix4(playerMesh.matrixWorld);
-  const dir = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(cameraPitch, cameraYaw, 0, 'YXZ'));
-  return { position: worldTip, direction: dir.normalize() };
+  return { position: worldTip, direction: dir };
 }
 
 export function canShootPrimary() {
@@ -344,6 +357,7 @@ function clampToBounds(pos) {
 
 let lastAbilityKey = false;
 let lastMeleeKey = false;
+let lastCamKey = false;
 
 export function updatePlayer(dt) {
   if (!playerMesh || !mechConfig) return;
@@ -352,7 +366,11 @@ export function updatePlayer(dt) {
   const { dx, dy } = consumeMouseDelta();
   cameraYaw -= dx * 0.0022;
   cameraPitch -= dy * 0.0022;
-  cameraPitch = Math.max(-0.65, Math.min(0.55, cameraPitch));
+  if (cameraMode === 'first') {
+    cameraPitch = Math.max(-1.15, Math.min(1.05, cameraPitch));
+  } else {
+    cameraPitch = Math.max(-0.65, Math.min(0.55, cameraPitch));
+  }
 
   // ── Timers ──
   if (fireTimer > 0) fireTimer -= dt;
@@ -389,6 +407,11 @@ export function updatePlayer(dt) {
   const meleeKey = isKeyDown('KeyQ');
   if (meleeKey && !lastMeleeKey) document.dispatchEvent(new CustomEvent('meleeTriggered'));
   lastMeleeKey = meleeKey;
+
+  // Camera view toggle (V)
+  const camKey = isKeyDown('KeyV');
+  if (camKey && !lastCamKey) toggleCameraView();
+  lastCamKey = camKey;
 
   // ── Movement ──
   const forward = new THREE.Vector3(Math.sin(cameraYaw), 0, Math.cos(cameraYaw));
@@ -498,22 +521,45 @@ export function updatePlayer(dt) {
     spawnBoostTrail(playerMesh.position.clone().add(new THREE.Vector3(0, 2.5, 0)), '#ff9a55');
   }
 
-  // ── Camera: over-shoulder follow ──
+  // ── Camera ──
   const sc = mechConfig.scale;
-  const dist = 12 + sc * 3;
-  const cosP = Math.cos(cameraPitch);
-  const camOffset = new THREE.Vector3(
-    Math.sin(cameraYaw) * dist * cosP + Math.cos(cameraYaw) * 1.8,
-    (4.5 + sc) - Math.sin(cameraPitch) * dist * 0.85,
-    Math.cos(cameraYaw) * dist * cosP - Math.sin(cameraYaw) * 1.8
-  );
-  camTargetPos.copy(playerMesh.position).add(camOffset);
-  const minCamY = terrainHeight(camTargetPos.x, camTargetPos.z) + 1.6;
-  if (camTargetPos.y < minCamY) camTargetPos.y = minCamY;
-  camera.position.lerp(camTargetPos, Math.min(1, 9 * dt));
+  if (cameraMode === 'first') {
+    // First person: eye at the helm, exact aim, walk bob
+    playerMesh.visible = false;
+    const bob = (hoverY < 0.3 && horizSpeed > 0.6) ? Math.abs(Math.cos(walkPhase)) * 0.18 : 0;
+    camera.position.set(
+      playerMesh.position.x,
+      playerMesh.position.y + 4.85 * sc + bob,
+      playerMesh.position.z
+    );
+    const lookDir = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(cameraPitch, cameraYaw, 0, 'YXZ'));
+    camera.lookAt(camera.position.clone().add(lookDir));
+  } else {
+    // Third person: over-shoulder, mech pushed left so targets stay visible
+    playerMesh.visible = true;
+    const dist = 12 + sc * 3;
+    const cosP = Math.cos(cameraPitch);
+    const side = 3.0;
+    const camOffset = new THREE.Vector3(
+      Math.sin(cameraYaw) * dist * cosP + Math.cos(cameraYaw) * side,
+      (4.5 + sc) - Math.sin(cameraPitch) * dist * 0.85,
+      Math.cos(cameraYaw) * dist * cosP - Math.sin(cameraYaw) * side
+    );
+    camTargetPos.copy(playerMesh.position).add(camOffset);
+    const minCamY = terrainHeight(camTargetPos.x, camTargetPos.z) + 1.6;
+    if (camTargetPos.y < minCamY) camTargetPos.y = minCamY;
+    camera.position.lerp(camTargetPos, Math.min(1, 9 * dt));
 
-  const lookTarget = playerMesh.position.clone().add(new THREE.Vector3(
-    Math.cos(cameraYaw) * 1.2, 3.2 * sc + cameraPitch * 5, -Math.sin(cameraYaw) * 1.2
-  ));
-  camera.lookAt(lookTarget);
+    const lookTarget = playerMesh.position.clone().add(new THREE.Vector3(
+      Math.cos(cameraYaw) * 2.4, 3.2 * sc + cameraPitch * 5, -Math.sin(cameraYaw) * 2.4
+    ));
+    camera.lookAt(lookTarget);
+  }
+
+  // Boost FOV kick
+  const targetFov = 70 + (isSprinting ? 7 : 0) + (cameraMode === 'first' ? 5 : 0);
+  if (Math.abs(camera.fov - targetFov) > 0.05) {
+    camera.fov += (targetFov - camera.fov) * Math.min(1, 6 * dt);
+    camera.updateProjectionMatrix();
+  }
 }

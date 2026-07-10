@@ -106,6 +106,7 @@
       <div class="ctrl-row"><span class="ctrl-key">SPACE</span><span class="ctrl-desc">Hover jets</span></div>
       <div class="ctrl-row"><span class="ctrl-key">R</span><span class="ctrl-desc">Reload shells</span></div>
       <div class="ctrl-row"><span class="ctrl-key">F</span><span class="ctrl-desc">Interact — shrines, bounty board</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">V</span><span class="ctrl-desc">Toggle first / third person view</span></div>
       <div class="ctrl-row"><span class="ctrl-key">M</span><span class="ctrl-desc">Kingdom map</span></div>
       <div class="ctrl-row"><span class="ctrl-key">ESC</span><span class="ctrl-desc">Pause / close</span></div>
     </div>
@@ -181,8 +182,12 @@
         <div class="ch-line h l"></div><div class="ch-line h r"></div>
         <div class="ch-line v u"></div><div class="ch-line v d"></div>
         <div class="ch-dot"></div>
+        <div id="hit-marker"></div>
       </div>
     </div>
+
+    <!-- Floating damage numbers -->
+    <div id="damage-numbers"></div>
 
     <!-- Right: weapon + ability -->
     <div class="hud-right">
@@ -209,6 +214,7 @@
     <div class="hud-bottom">
       <div class="hud-stat"><span class="hud-stat-lbl">SCORE</span><span class="hud-stat-val" id="score-value">0</span></div>
       <div class="hud-stat"><span class="hud-stat-lbl">KILLS</span><span class="hud-stat-val" id="kills-value">0</span></div>
+      <div class="hud-stat"><span class="hud-stat-lbl">TIME</span><span class="hud-stat-val" id="time-value">☀ 17:00</span></div>
       <div class="hud-stat"><span class="hud-stat-lbl">REGION</span><span class="hud-stat-val region" id="region-value">EMBERFALL</span></div>
     </div>
 

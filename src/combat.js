@@ -6,7 +6,7 @@ import { State } from './state.js';
 import { playerMesh, getShootOrigin, canShootPrimary, canShootHeavy, cameraYaw } from './player.js';
 import { enemies, currentBoss } from './enemies.js';
 import { spawnExplosion, spawnHitSpark, spawnMuzzleFlash, spawnSwordArc, triggerCameraShake } from './effects.js';
-import { terrainHeight } from './world.js';
+import { terrainHeight, spawnPickup } from './world.js';
 import { Audio } from './audio.js';
 
 export let projectiles = [];
@@ -144,6 +144,15 @@ export function dealDamageToEnemy(enemy, damage) {
   if (!enemy || enemy.health <= 0) return;
   enemy.health -= damage;
 
+  // Hit feedback: crosshair marker + floating damage number
+  document.dispatchEvent(new CustomEvent('enemyDamaged', {
+    detail: {
+      position: enemy.mesh.position.clone().add(new THREE.Vector3(0, 3 * enemy.scale, 0)),
+      amount: damage,
+      killed: enemy.health <= 0
+    }
+  }));
+
   // Red damage flash (guarded so rapid fire doesn't stack timeouts)
   if (!enemy.flashing) {
     enemy.flashing = true;
@@ -173,6 +182,14 @@ export function dealDamageToEnemy(enemy, damage) {
     State.addGold(enemy.goldReward);
     State.player.score += enemy.scoreReward;
     State.player.kills += 1;
+
+    // Fallen engines shed repair scrap
+    if (enemy.isBoss) {
+      spawnPickup(enemy.mesh.position.x + 3, enemy.mesh.position.z, 'repair', 80, false);
+      spawnPickup(enemy.mesh.position.x - 3, enemy.mesh.position.z + 3, 'repair', 80, false);
+    } else if (Math.random() < 0.3) {
+      spawnPickup(enemy.mesh.position.x, enemy.mesh.position.z, 'repair', 40, false);
+    }
 
     if (enemy.isBoss) {
       scene.remove(enemy.mesh);

@@ -34,11 +34,43 @@ export function initHUD() {
     if (gc) gc.appendChild(feed);
   }
 
-  // Toast listener (bind once)
+  // Toast + hit feedback listeners (bind once)
   if (!window.__toastBound) {
     window.__toastBound = true;
     document.addEventListener('toast', (e) => showToast(e.detail));
+    document.addEventListener('enemyDamaged', (e) => onEnemyDamaged(e.detail));
   }
+}
+
+// ────────────────────────────────────────────
+// HIT MARKERS + FLOATING DAMAGE NUMBERS
+// ────────────────────────────────────────────
+const _dmgProj = new THREE.Vector3();
+
+function onEnemyDamaged({ position, amount, killed }) {
+  // Crosshair hit marker flash
+  const hm = document.getElementById('hit-marker');
+  if (hm) {
+    hm.classList.remove('show', 'kill');
+    void hm.offsetWidth;
+    hm.classList.add('show');
+    if (killed) hm.classList.add('kill');
+  }
+
+  // Floating damage number at the enemy's position
+  const wrap = document.getElementById('damage-numbers');
+  if (!wrap || !camera) return;
+  _dmgProj.set(position.x, position.y, position.z).project(camera);
+  if (_dmgProj.z > 1) return; // behind the camera
+
+  const el = document.createElement('div');
+  el.className = 'dmg-num' + (killed ? ' kill' : '');
+  el.textContent = Math.round(amount);
+  el.style.left = ((_dmgProj.x * 0.5 + 0.5) * window.innerWidth + (Math.random() - 0.5) * 34) + 'px';
+  el.style.top = ((-_dmgProj.y * 0.5 + 0.5) * window.innerHeight - 8) + 'px';
+  wrap.appendChild(el);
+  while (wrap.children.length > 14) wrap.removeChild(wrap.firstChild);
+  setTimeout(() => el.remove(), 900);
 }
 
 // ────────────────────────────────────────────
@@ -102,6 +134,16 @@ export function updateHUD() {
   setText('score-value', p.score.toLocaleString());
   setText('kills-value', p.kills);
   setText('hud-gold-value', State.gold.toLocaleString());
+
+  // Time-of-day clock
+  const timeEl = document.getElementById('time-value');
+  if (timeEl) {
+    const h24 = State.timeOfDay * 24;
+    const hh = Math.floor(h24);
+    const mm = Math.floor(((h24 - hh) * 60) / 10) * 10;
+    const icon = State.timeOfDay > 0.27 && State.timeOfDay < 0.79 ? '☀' : '☾';
+    timeEl.textContent = `${icon} ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  }
 
   // Ability cooldown
   const cdOverlay = document.getElementById('ability-cooldown');
